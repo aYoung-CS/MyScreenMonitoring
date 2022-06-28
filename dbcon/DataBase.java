@@ -2,7 +2,7 @@ package dbcon;
 
 import java.sql.*;
 
-public class DataBase {
+public class Database {
     public static Connection DatabaseInit()
     {
         Connection c = null;
@@ -49,17 +49,11 @@ public class DataBase {
         }
     }
 
-    /** 用户注册函数
-     *
-     * @param c
-     * @param Username 用户名
-     * @param Password 密码
-     * @param Ip IP
-     * @param Mac MAC地址
-     * @return 1:注册成功 0:注册错误 2:用户名重复
-     * @throws SQLException
-     */
-
+    // 用户注册函数
+//传入参数 用户名、密码、IP、MAC地址
+//返回值 1:注册成功 0:注册错误 2:用户名重复
+//
+//
     public static int Register(Connection c ,String Username, String Password, String Ip, String Mac) throws SQLException
     {
         Statement stmt=null;
@@ -93,16 +87,8 @@ public class DataBase {
 
 
     //
-//
-//传入
-
-    /**
-     * 用户登录函数
-     * @param c
-     * @param Username 用户名
-     * @param Password 密码
-     * @return 登录成功返回1，失败返回0
-     */
+//用户登录函数
+//传入用户名和密码，登录成功返回1，失败返回0
     private static int Login(Connection c,String Username,String Password)
     {
         Statement stmt=null;
