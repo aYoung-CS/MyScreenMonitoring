@@ -2,6 +2,7 @@ package client;
 
 import dbcon.User;
 import protocol.Protocol;
+import protocol.Result;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -182,23 +183,36 @@ public class Client {
 		final Client client = new Client();
 		client.connect();
 		User user = new User();
-		user.setUsername("kkfine");
-		user.setPassword("kkfine");
+		user.setUsername("ayoung12");
+		user.setPassword("ayoung122");
 
-		client.sendUser(Protocol.TYPE_LOGIN,user);
+		DataInputStream dis;
+		Result result ;
+
+		client.sendUser(Protocol.TYPE_REGISTER,user);
+		dis = new DataInputStream(client.socket.getInputStream());
+		result = Protocol.getResult(dis);
+		System.out.println(new String(result.getData(), "UTF-8"));
+//
+//		client.sendUser(Protocol.TYPE_LOGIN,user);
+//		System.out.println("1");
+//		result = Protocol.getResult(dis);
+//		System.out.println("3");
+//		System.out.println(new String(result.getData(), "UTF-8"));
+
 
 		/*
 		client.load();// µÇÂ¼
 
 		client.showSystemTray();// ÏÔÊ¾ÍÐÅÌ
 		*/
-		while(client.islive){
-			System.out.println("1");
-			BufferedImage bufferedImage = client.getScreenShot();
-			user.imageData = client.saveImage(bufferedImage);
-			client.sendUser(Protocol.TYPE_IMAGE,user);
-			Thread.sleep(50);
-			System.exit(1);;
-		}
+//		while(client.islive){
+//			System.out.println("1");
+//			BufferedImage bufferedImage = client.getScreenShot();
+//			user.imageData = client.saveImage(bufferedImage);
+//			client.sendUser(Protocol.TYPE_IMAGE,user);
+//			Thread.sleep(50);
+//			System.exit(1);;
+//		}
 	}
 }

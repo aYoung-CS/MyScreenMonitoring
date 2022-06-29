@@ -33,6 +33,7 @@ public class Protocol {
         return TYPE_USER;
     }
 
+
     public static void send(int type, DataOutputStream dos, byte[] data) throws IOException {
 //        System.out.println(data.length);
         int TotalLen = 1+4+data.length;
@@ -51,11 +52,11 @@ public class Protocol {
 
         try {
             byte type = dis.readByte();
-//            System.out.println("type is " + type);
+            System.out.println("type is " + type);
             int totalLen=dis.readInt();
-//            System.out.println("totalLen is " + type);
+            System.out.println("totalLen is " + totalLen);
             byte[] bytes=new byte[totalLen-4-1];
-//            System.out.println(bytes.length);
+            System.out.println(bytes.length);
             dis.readFully(bytes);
             return new Result(type&0xFF,totalLen,bytes);
         } catch (IOException e) {

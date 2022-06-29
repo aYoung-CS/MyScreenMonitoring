@@ -1,6 +1,7 @@
 package server;
 
 
+import dbcon.DataBase;
 import server.ServerView;
 
 import javax.swing.text.View;
@@ -24,6 +25,7 @@ public class Server {
 	public static String HostName;
 
 	public static void main(String[] args) {
+		DataBase.DatabaseInit();
 		InetAddress ia = null;
 		try {
 			ia = InetAddress.getLocalHost();
@@ -40,10 +42,10 @@ public class Server {
 			e1.printStackTrace();
 		}
 		try {
-			ServerSocket serverSocket=new ServerSocket(port);
+			ServerSocket serverSocket = new ServerSocket(port);
 //			view.create();
 			while(serverLive){
-				Socket socket=serverSocket.accept();
+				Socket socket = serverSocket.accept();
 				new Thread(new ServerShotHandler(socket)).start();
 			}
 		} catch (IOException e) {
