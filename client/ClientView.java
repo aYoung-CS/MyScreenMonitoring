@@ -22,7 +22,7 @@ public class ClientView extends Application {
 //    public static void ClientView(String[] args){
 //        Application.launch(args);
 //    }
-//    ç›¸å…³å˜é‡
+//    Ïà¹Ø±äÁ¿
 
     public String Username;
     public String Password;
@@ -44,42 +44,42 @@ public class ClientView extends Application {
 
 
 //CreateButton
-//é¦–é¡µæŒ‰é’®
-        Button button1 = new Button("  ç™»å½•  ");
+//Ê×Ò³°´Å¥
+        Button button1 = new Button("  µÇÂ¼  ");
         button1.setLayoutX(350);
         button1.setLayoutY(280);
 
-        Button button2 = new Button("  æ³¨å†Œ  ");
+        Button button2 = new Button("  ×¢²á  ");
         button2.setLayoutX(350);
         button2.setLayoutY(320);
-//ç™»å½•æŒ‰é’®
-        Button button3 = new Button("  ç¡®è®¤ç™»å½•  ");
+//µÇÂ¼°´Å¥
+        Button button3 = new Button("  È·ÈÏµÇÂ¼  ");
         button3.setLayoutX(290);
         button3.setLayoutY(400);
 
-        Button button4 = new Button("   å–æ¶ˆ   ");
+        Button button4 = new Button("   È¡Ïû   ");
         button4.setLayoutX(410);
         button4.setLayoutY(400);
-//æ³¨å†ŒæŒ‰é’®
-        Button button5 = new Button("  ç¡®è®¤æ³¨å†Œ  ");
+//×¢²á°´Å¥
+        Button button5 = new Button("  È·ÈÏ×¢²á  ");
         button5.setLayoutX(290);
         button5.setLayoutY(500);
 
-        Button button6 = new Button("    å–æ¶ˆ   ");
+        Button button6 = new Button("    È¡Ïû   ");
         button6.setLayoutX(410);
         button6.setLayoutY(500);
-//å®¢æˆ·ç«¯ç•Œé¢æŒ‰é’®
-        Button button7 = new Button("    é€€å‡º   ");
+//¿Í»§¶Ë½çÃæ°´Å¥
+        Button button7 = new Button("    ÍË³ö   ");
         button7.setLayoutX(300);
         button7.setLayoutY(400);
 
 //CreateLabel
-//ç™»å½•æ ‡ç­¾
-        Label label1 = new Label("ç”¨æˆ·å");
+//µÇÂ¼±êÇ©
+        Label label1 = new Label("ÓÃ»§Ãû");
         label1.setLayoutX(250);
         label1.setLayoutY(200);
 
-        Label label2 = new Label("å¯†ç ");
+        Label label2 = new Label("ÃÜÂë");
         label2.setLayoutX(250);
         label2.setLayoutY(250);
 
@@ -90,12 +90,12 @@ public class ClientView extends Application {
         Label label4 = new Label("severPort");
         label4.setLayoutX(250);
         label4.setLayoutY(350);
-//æ³¨å†Œæ ‡ç­¾
-        Label label5 = new Label("ç”¨æˆ·å");
+//×¢²á±êÇ©
+        Label label5 = new Label("ÓÃ»§Ãû");
         label5.setLayoutX(250);
         label5.setLayoutY(150);
 
-        Label label6 = new Label("å¯†ç ");
+        Label label6 = new Label("ÃÜÂë");
         label6.setLayoutX(250);
         label6.setLayoutY(200);
 
@@ -119,13 +119,13 @@ public class ClientView extends Application {
         label11.setLayoutX(250);
         label11.setLayoutY(450);
 
-//å®¢æˆ·ç«¯ç•Œé¢æ ‡ç­¾
-        Label label12 = new Label("ç›‘æ§é¢‘ç‡");
+//¿Í»§¶Ë½çÃæ±êÇ©
+        Label label12 = new Label("¼à¿ØÆµÂÊ");
         label12.setLayoutX(250);
         label12.setLayoutY(300);
 
 //CreateTextField
-//ç™»å½•æ–‡æœ¬æ¡†
+//µÇÂ¼ÎÄ±¾¿ò
         TextField textField1 = new TextField ();
         textField1.setLayoutX(340);
         textField1.setLayoutY(200);
@@ -151,7 +151,7 @@ public class ClientView extends Application {
             System.out.println(severPort);
         });
 
-//æ³¨å†Œæ–‡æœ¬æ¡†
+//×¢²áÎÄ±¾¿ò
         TextField textField4 = new TextField ();
         textField4.setLayoutX(340);
         textField4.setLayoutY(150);
@@ -193,7 +193,7 @@ public class ClientView extends Application {
             System.out.println(SeverPort);
         });
 
-//å®¢æˆ·ç«¯ç•Œé¢æ–‡æœ¬æ¡†
+//¿Í»§¶Ë½çÃæÎÄ±¾¿ò
         TextField textField9 = new TextField ();
         textField9.setLayoutX(340);
         textField9.setLayoutY(300);
@@ -205,7 +205,7 @@ public class ClientView extends Application {
 
 
 //CreatepasswordField
-//ç™»å½•å¯†ç æ¡†
+//µÇÂ¼ÃÜÂë¿ò
         PasswordField passwordField1 = new PasswordField();
         passwordField1.setLayoutX(340);
         passwordField1.setLayoutY(250);
@@ -215,7 +215,7 @@ public class ClientView extends Application {
             System.out.println(Password);
         });
 
-//æ³¨å†Œå¯†ç æ¡†
+//×¢²áÃÜÂë¿ò
         PasswordField passwordField2 = new PasswordField();
         passwordField2.setLayoutX(340);
         passwordField2.setLayoutY(200);
@@ -235,7 +235,7 @@ public class ClientView extends Application {
             System.out.println(repwd);
         });
 
-//æ³¨å†Œå¯†ç åˆ¤æ–­æ˜¯å¦ä¸€è‡´
+//×¢²áÃÜÂëÅĞ¶ÏÊÇ·ñÒ»ÖÂ
         Text text1 = new Text("");
         Font font1 = Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 12);
         text1.setFont(font1);
@@ -250,10 +250,10 @@ public class ClientView extends Application {
         text2.setFill(Color.BROWN);
 
 //CreatePane
-        AnchorPane pane1 = new AnchorPane();//é¦–é¡µå¸ƒå±€
-        AnchorPane pane2 = new AnchorPane();//ç™»å½•ç•Œé¢å¸ƒå±€
-        AnchorPane pane3 = new AnchorPane();//æ³¨å†Œç•Œé¢å¸ƒå±€
-        AnchorPane pane4 = new AnchorPane();//å®¢æˆ·ç«¯ç›‘æ§ç•Œé¢å¸ƒå±€
+        AnchorPane pane1 = new AnchorPane();//Ê×Ò³²¼¾Ö
+        AnchorPane pane2 = new AnchorPane();//µÇÂ¼½çÃæ²¼¾Ö
+        AnchorPane pane3 = new AnchorPane();//×¢²á½çÃæ²¼¾Ö
+        AnchorPane pane4 = new AnchorPane();//¿Í»§¶Ë¼à¿Ø½çÃæ²¼¾Ö
         pane1.getChildren().addAll(button1,button2);
         pane2.getChildren().addAll(button3,button4,label1,label2,label3,label4,textField1,textField2,textField3,passwordField1);
         pane3.getChildren().addAll(button5,button6,label5,label6,label7,label8,label9,label10,label11,textField4,textField5,textField6,textField7,textField8,passwordField2,passwordField3,text1,text2);
@@ -265,7 +265,7 @@ public class ClientView extends Application {
         Scene ClientMonitor = new Scene(pane4,800,600);
         Client.setScene(ClientHome);
 
-//æŒ‰é’®ç‚¹å‡»äº‹ä»¶
+//°´Å¥µã»÷ÊÂ¼ş
         button1.setOnAction(event -> {
             Client.setScene(SignIn);
         });
@@ -280,7 +280,7 @@ public class ClientView extends Application {
             severPort = textField3.getText();
             Password = passwordField1.getText();
             type = 1;
-//æµ‹è¯•
+//²âÊÔ
             System.out.println(Username);
             System.out.println(severIP);
             System.out.println(severPort);
@@ -306,10 +306,10 @@ public class ClientView extends Application {
             type = 0;
 
             if(!Password.equals(repwd)) {
-                text1.setText("å¯†ç ä¸ä¸€è‡´");
-                text2.setText("å¯†ç ä¸ä¸€è‡´");
+                text1.setText("ÃÜÂë²»Ò»ÖÂ");
+                text2.setText("ÃÜÂë²»Ò»ÖÂ");
             }
-//æµ‹è¯•
+//²âÊÔ
             System.out.println(Username);
             System.out.println(ClientIP);
             System.out.println(ClientMac);
@@ -332,7 +332,7 @@ public class ClientView extends Application {
 
 
 //        stage.setScene(Client.scene);
-        Client.setTitle("è¿œç¨‹æ¡Œé¢ç›‘æ§");
+        Client.setTitle("Ô¶³Ì×ÀÃæ¼à¿Ø");
 //        Client.setWidth(800);
 //        Client.setHeight(600);
         Client.getIcons().add(new Image("file:img/1.jpeg"));

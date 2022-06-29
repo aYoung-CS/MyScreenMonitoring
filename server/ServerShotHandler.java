@@ -42,15 +42,17 @@ public class ServerShotHandler implements Runnable{
             Result result = Protocol.getResult(dis);
             System.out.println(result+"-----");
 //            System.out.println(result.getType());
-            if (result.getType() <=2){
+            int type = result.getType();
+            if (type <= 2){
                 System.out.println("yes");
                 User user = DeserializeData(result.getData());
                 System.out.println(user.getPassword());
                 System.out.println(user.getUsername());
+            }
+            else if(result.getType() == Protocol.TYPE_LOGOUT){
 
-            }else if(result.getType() == Protocol.TYPE_LOGOUT){
-
-            }else if(result.getType() == Protocol.TYPE_IMAGE){
+            }
+            else if(result.getType() == Protocol.TYPE_IMAGE){
 
             }
         }catch (Exception e){

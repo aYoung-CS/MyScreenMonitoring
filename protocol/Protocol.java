@@ -14,7 +14,26 @@ public class Protocol {
     public static int TYPE_USER=5;    // 表示传输协议中 数据字段关于user用户的信息的标志位，值为user类的序列化数据
     public static int TYPE_RESULT=6;  //表示传输协议中 数据字段关于服务端对于用户登陆注册的响应标志位
 
-    public static void send(int type, DataOutputStream dos,byte[] data) throws IOException {
+    public static int getTypeImage() {
+        return TYPE_IMAGE;
+    }
+    public static int getTypeLogin() {
+        return TYPE_LOGIN;
+    }
+    public static int getTypeLogout() {
+        return TYPE_LOGOUT;
+    }
+    public static int getTypeRegister() {
+        return TYPE_REGISTER;
+    }
+    public static int getTypeResult() {
+        return TYPE_RESULT;
+    }
+    public static int getTypeUser() {
+        return TYPE_USER;
+    }
+
+    public static void send(int type, DataOutputStream dos, byte[] data) throws IOException {
 //        System.out.println(data.length);
         int TotalLen = 1+4+data.length;
 //        System.out.println(TotalLen);

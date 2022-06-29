@@ -9,7 +9,6 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.nio.Buffer;
 
 /**
  * @Title Client
@@ -31,7 +30,6 @@ public class Client {
 	public Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 	DataOutputStream dos = null;
 
-	DataOutputStream dataOutputStream = null;
 
 	/**
 	 * init
@@ -57,7 +55,7 @@ public class Client {
 	public void connect(){
 		try{
 			socket = new Socket(serverIP, serverPort);
-			dataOutputStream = new DataOutputStream(socket.getOutputStream());
+			dos = new DataOutputStream(socket.getOutputStream());
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -116,10 +114,18 @@ public class Client {
 			switch (type){
 				case 1:
 					Protocol.send(Protocol.TYPE_REGISTER,dos,data);
+					break;
 				case 2:
 					Protocol.send(Protocol.TYPE_LOGIN,dos,data);
+					break;
 				case 3:
-
+					Protocol.send(Protocol.TYPE_LOGOUT,dos,data);
+					break;
+				case 4:
+					Protocol.send(Protocol.TYPE_IMAGE,dos,data);
+					break;
+				default:
+					break;
 			}
 		}catch (Exception e){
 
@@ -141,22 +147,26 @@ public class Client {
 		return bytes;
 	}
 
-
 	/**
-	 * 发送图片
+	 * 图片数据保存到user对象中
 	 * @param buff
 	 */
-	public void sendImage(BufferedImage buff) {
-		if (buff == null)
-			return;
+	public byte[] saveImage(BufferedImage buff) {
+		if (buff == null){
+			islive = false;
+			System.out.println("捕捉图片为空");
+			return null;
+		}
 		try {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			ImageIO.write(buff, "png", baos);
-			Protocol.send(Protocol.TYPE_IMAGE, dos, baos.toByteArray());
+			byte[] res = baos.toByteArray();
 			baos.close();
-			System.out.println("send file successfully");
+			System.out.println("save file successfully");
+			return res;
 		} catch (IOException e) {
 			e.printStackTrace();
+			return null;
 		}
 	}
 
@@ -172,28 +182,23 @@ public class Client {
 		final Client client = new Client();
 		client.connect();
 		User user = new User();
-
 		user.setUsername("kkfine");
 		user.setPassword("kkfine");
+
 		client.sendUser(Protocol.TYPE_LOGIN,user);
 
 		/*
 		client.load();// 登录
 
 		client.showSystemTray();// 显示托盘
-		while (client.isLive) {
-			client.sendImage(client.getScreenShot());
-			try {
-				Thread.sleep(50);
-			} catch (InterruptedException ev) {
-
-			}
-		}
-		 */
+		*/
 		while(client.islive){
+			System.out.println("1");
 			BufferedImage bufferedImage = client.getScreenShot();
-			client.sendImage(bufferedImage);
+			user.imageData = client.saveImage(bufferedImage);
+			client.sendUser(Protocol.TYPE_IMAGE,user);
 			Thread.sleep(50);
+			System.exit(1);;
 		}
 	}
 }

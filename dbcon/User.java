@@ -1,6 +1,8 @@
 package dbcon;
 
-public class User {
+import java.io.Serializable;
+
+public class User implements Serializable {
     public String Username;
     public String Password;
     public String RePassword;
@@ -8,6 +10,7 @@ public class User {
     public String ClientMac;
     public String severIP;
     public String SeverPort;
+    public byte[] imageData;
 
     public User(){
 
