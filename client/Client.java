@@ -1,8 +1,12 @@
 package client;
 
 import dbcon.User;
+import javafx.application.Application;
+import javafx.stage.Stage;
+import net.coobird.thumbnailator.Thumbnails;
 import protocol.Protocol;
-import protocol.Result;
+import server.ServerShotHandler;
+import src.myutil.Result;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -10,6 +14,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * @Title Client
@@ -19,19 +24,17 @@ import java.net.UnknownHostException;
 
 public class Client {
 
-	Socket socket;
+	private static Socket socket;
 	Robot robot;
-	private String serverIP = "192.168.0.4";
+	private String serverIP = "192.168.47.1";
 	private int serverPort = 33000;
 	static boolean islive = true;
-	public int loginType;
-	public String Password;
-	public String Username;
-	public String repwd;
 	public Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-	DataOutputStream dos = null;
-
-
+	private static DataOutputStream dos = null;
+	private static BufferedReader bufferedReader = null;
+	private static BufferedReader bufferedReader_Server = null;
+	private static BufferedWriter bufferedWriter = null;
+	private static DataInputStream din = null;
 	/**
 	 * init
 	 */
@@ -65,38 +68,6 @@ public class Client {
 	}
 
 	/**
-	 * 登录
-	 */
-	public void login(){
-
-	}
-
-	/**
-	 * 注册
-	 */
-	public void register(){
-
-	}
-
-	/**
-	 * 退出
-	 * @throws IOException
-	 */
-	public void logout() throws IOException {
-		//向服务器发送消息
-		Protocol.send(Protocol.TYPE_LOGOUT, dos,new String("logout").getBytes());
-		// 关闭资源
-		try {
-			if (dos != null)
-				dos.close();
-			if (socket != null)
-				socket.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	/**
 	 * 截屏
 	 */
 	public BufferedImage getScreenShot(){
@@ -109,7 +80,7 @@ public class Client {
 	 * @param user
 	 * @throws IOException
 	 */
-	public void sendUser(int type,User user) throws IOException{
+	public static void sendUser(int type, User user) throws IOException{
 		byte[] data = SerializeData(user);
 		try {
 			switch (type){
@@ -139,7 +110,7 @@ public class Client {
 	 * @return
 	 * @throws IOException
 	 */
-	public byte[] SerializeData(User user) throws IOException {
+	public static byte[] SerializeData(User user) throws IOException {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		ObjectOutputStream out = new ObjectOutputStream(bos);
 		out.writeObject(user);
@@ -148,27 +119,56 @@ public class Client {
 		return bytes;
 	}
 
+	private static double getAccuracy(long size) {
+		double accuracy;
+		if (size < 900) {
+			accuracy = 0.85;
+		} else if (size < 2047) {
+			accuracy = 0.6;
+		} else if (size < 3275) {
+			accuracy = 0.44;
+		} else {
+			accuracy = 0.4;
+		}
+		return accuracy;
+	}
 	/**
 	 * 图片数据保存到user对象中
 	 * @param buff
 	 */
-	public byte[] saveImage(BufferedImage buff) {
+	public byte[] saveImage(BufferedImage buff,long desFileSize) throws IOException {
+		byte[] bs = null;
 		if (buff == null){
 			islive = false;
 			System.out.println("捕捉图片为空");
 			return null;
 		}
-		try {
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			ImageIO.write(buff, "png", baos);
-			byte[] res = baos.toByteArray();
-			baos.close();
-			System.out.println("save file successfully");
-			return res;
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ImageIO.write(buff, "png", baos);
+		byte[] imageBytes = baos.toByteArray();
+		baos.close();
+		if (imageBytes == null || imageBytes.length <= 0 || imageBytes.length < desFileSize * 1024) {
+			return imageBytes;
 		}
+		long srcSize = imageBytes.length;
+		double accuracy = getAccuracy(srcSize / 1024);
+		try {
+			while (imageBytes.length > desFileSize * 1024) {
+				ByteArrayInputStream inputStream = new ByteArrayInputStream(imageBytes);
+				ByteArrayOutputStream outputStream = new ByteArrayOutputStream(imageBytes.length);
+				Thumbnails.of(inputStream)
+						.scale(accuracy)
+						.outputQuality(accuracy)
+						.toOutputStream(outputStream);
+				imageBytes = outputStream.toByteArray();
+			}
+
+			System.out.println("【图片压缩】  图片原大小=" + srcSize / 1024 + "+kb | 压缩后大小=" + imageBytes.length / 1024 + "kb");
+		} catch (Exception e) {
+			System.out.println("【图片压缩】msg=图片压缩失败!" + e);
+		}
+		return imageBytes;
+
 	}
 
 	/**
@@ -178,41 +178,38 @@ public class Client {
 
 	}
 
-	public static void main(String[] args) throws IOException, InterruptedException {
+	public static String GetMsg() throws IOException {
+		din = new DataInputStream(socket.getInputStream());
+		System.out.println(din);
+		Result result = Protocol.getResult(din);
+		return new String(result.getData(),StandardCharsets.UTF_8);
+	}
+
+	public static void main(String[] args) throws Exception {
 
 		final Client client = new Client();
 		client.connect();
+		ClientView.ClientView(args,dos,socket);
+
 		User user = new User();
-		user.setUsername("ayoung12");
-		user.setPassword("ayoung122");
-
-		DataInputStream dis;
-		Result result ;
-
-		client.sendUser(Protocol.TYPE_REGISTER,user);
-		dis = new DataInputStream(client.socket.getInputStream());
-		result = Protocol.getResult(dis);
-		System.out.println(new String(result.getData(), "UTF-8"));
+		user.setUsername("kkfine");
+		user.setPassword("kkfine");
 
 		client.sendUser(Protocol.TYPE_LOGIN,user);
-		System.out.println("1");
-		result = Protocol.getResult(dis);
-		System.out.println("3");
-		System.out.println(new String(result.getData(), "UTF-8"));
-
+		String res2 = GetMsg();
+		System.out.println(res2);
 
 		/*
 		client.load();// 登录
-
 		client.showSystemTray();// 显示托盘
 		*/
-//		while(client.islive){
-//			System.out.println("1");
-//			BufferedImage bufferedImage = client.getScreenShot();
-//			user.imageData = client.saveImage(bufferedImage);
-//			client.sendUser(Protocol.TYPE_IMAGE,user);
-//			Thread.sleep(50);
-//			System.exit(1);;
-//		}
+
+		while(client.islive){
+			BufferedImage bufferedImage = client.getScreenShot();
+			user.imageData = client.saveImage(bufferedImage,100);
+			client.sendUser(Protocol.TYPE_IMAGE,user);
+			Thread.sleep(50);
+			System.exit(1);;
+		}
 	}
 }

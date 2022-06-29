@@ -3,13 +3,12 @@ package server;
 import dbcon.DataBase;
 import dbcon.User;
 import protocol.Protocol;
-import protocol.Result;
-import server.Server;
-import server.ServerView;
-import dbcon.DataBase;
+import src.myutil.Result;
+import src.server.Server;
+import src.server.View;
 
-import javax.xml.crypto.Data;
-import java.awt.dnd.DropTarget;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
@@ -17,19 +16,18 @@ import java.nio.charset.StandardCharsets;
 public class ServerShotHandler implements Runnable{
     private Socket socket;
     private DataInputStream dis=null;
-    private DataOutputStream dos=null;
     private String key=null;
     private boolean isLive=true;
+    private DataOutputStream dos = null ;
+    InputStream in ;
 
-    public ServerShotHandler(){
-
-    }
 
     public ServerShotHandler(Socket socket){
         this.socket=socket;
         try {
             this.dis=new DataInputStream(socket.getInputStream());
         } catch (IOException e) {
+            e.printStackTrace();
             System.out.println("ServerShotHandler constructor is wrong");
         }
     }
@@ -41,68 +39,64 @@ public class ServerShotHandler implements Runnable{
         bin.close();
         return user;
     }
+
     @Override
     public void run() {
-        System.out.println("ok");
-        try {
-            dis = new DataInputStream(socket.getInputStream());
-            dos = new DataOutputStream(socket.getOutputStream());
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("dos/dis wrong");
-        }
-        while (true) {
-            try {
-                Result result = Protocol.getResult(dis);
-                System.out.println(result + "-----");
-                int type = result.getType();
-                User user = DeserializeData(result.getData());
-                if (type <= 2) {
-                    System.out.println("yes");
-                    System.out.println(user.getPassword());
-                    System.out.println(user.getUsername());
-                    System.out.println("???:" + result.getType());
+        while(isLive){
+            System.out.println("run accept");
+            Result result = null;
+            result = src.myutil.Protocol.getResult(dis);
+            System.out.println("result is :"  + result);
+
+            if(result!=null){
+                ShotHandler(result);
+            }else {
+                try {
+                    dis.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
-
-                int res;
-                byte[] msg = null;
-                System.out.println("type: " + type);
-                if (type == Protocol.TYPE_REGISTER) {
-                    res = DataBase.Register(user.getUsername(), user.getPassword(), user.getClientIP(), user.getClientMac());
-                    if (res == 2) { //用户名重复
-                        msg = "username repeat".getBytes(StandardCharsets.UTF_8);
-                    } else if (res == 1) { //注册成功
-                        msg = "success".getBytes(StandardCharsets.UTF_8);
-                    } else if (res == 0) { //注册错误
-                        msg = "fail".getBytes(StandardCharsets.UTF_8);
-                    }
-
-                    System.out.println("dos:"+dos);
-                    System.out.println("22222");
-                    Protocol.send(Protocol.TYPE_LOGIN, dos, msg);
-                    dos.flush();
-                } else if (type == Protocol.TYPE_LOGIN) {
-                    res = DataBase.Login(user.getUsername(), user.getPassword());
-
-                    if (res == 1) { //success
-                        System.out.println("login success");
-                        msg = "success".getBytes(StandardCharsets.UTF_8);
-                    } else if (res == 0) { //failed
-                        System.out.println("fail");
-                        msg = "fail".getBytes(StandardCharsets.UTF_8);
-                    }
-                    Protocol.send(Protocol.TYPE_LOGIN, dos, msg);
-                    dos.flush();
-                } else if (type == Protocol.TYPE_LOGOUT) {
-                    System.out.println("User" + user.getUsername() + "logout");
-                    socket.close();
-                } else if (type == Protocol.TYPE_IMAGE) {
-
-                }
-            } catch (Exception e) {
-                System.out.println(e);
-                System.out.println("ServerShotHandler run is wrong");
             }
+        }
+    }
+    public void ShotHandler(Result r){
+        try {
+            Result result = r;
+            User user = DeserializeData(result.getData());
+            dos = new DataOutputStream(socket.getOutputStream());
+
+            if (result.getType() == Protocol.TYPE_REGISTER){
+                DataBase.Register(user.getUsername(),user.getPassword(),user.getClientIP(),user.getClientMac());
+
+            }else if(result.getType() == Protocol.TYPE_LOGIN){
+
+                System.out.println("result.getType :" +result.getType());
+                int res = DataBase.Login(user.getUsername(),user.getPassword());
+                byte[] msg = null;
+                if(res == 1){
+                    msg = "login success".getBytes(StandardCharsets.UTF_8);
+                }else {
+                    msg = "login fail".getBytes(StandardCharsets.UTF_8);
+                }
+
+                Protocol.send(Protocol.TYPE_LOGIN,dos,msg);
+//                socket.close();
+
+            }else if(result.getType() == Protocol.TYPE_LOGOUT){
+
+                System.out.println("User " + user.getUsername() + "logout");
+
+            }else if(result.getType() == Protocol.TYPE_IMAGE){
+//                System.out.println("images");
+                ByteArrayInputStream bai=new ByteArrayInputStream(user.imageData);
+                BufferedImage buff= ImageIO.read(bai);
+                server.ServerView.centerPanel.setBufferedImage(buff);//为屏幕监控视图设置BufferedImage
+                server.ServerView.centerPanel.repaint();
+                isLive=false;
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            System.out.println("ServerShotHandler run is wrong");
         }
     }
 }

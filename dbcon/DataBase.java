@@ -3,14 +3,19 @@ package dbcon;
 import java.sql.*;
 
 public class DataBase {
+    public static Connection c = null;
+    public static Statement stmt = null;
 
-    public static Connection c;
-
+    public void DataBase(){
+        DatabaseInit();
+//        int result=Login("Tip5y","Test");
+//        System.out.println(result);
+    }
     public static Connection DatabaseInit()
     {
         try {
             Class.forName("org.sqlite.JDBC");
-            c = DriverManager.getConnection("jdbc:sqlite:D:/t/identifier.sqlite");
+            c = DriverManager.getConnection("jdbc:sqlite:test.db");
         } catch ( Exception e ) {
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
             System.out.println("数据库初始化失败");
@@ -32,7 +37,7 @@ public class DataBase {
         }
     }
 
-    public static void CreateTable()/*创建USER表*/
+    public static void CreateTable(Connection c)/*创建USER表*/
     {
         Statement stmt=null;
         try{
@@ -53,6 +58,7 @@ public class DataBase {
 
     /**
      * 用户注册函数
+     * @param
      * @param Username 用户名
      * @param Password 密码
      * @param Ip IP
@@ -94,9 +100,12 @@ public class DataBase {
 
     /**
      * 用户登录函数
+     * @param
+     * @param Username 用户名
+     * @param Password 密码
      * @return 登录成功返回1，失败返回0
      */
-    public static int Login(String Username, String Password)
+    public static int Login(String Username,String Password)
     {
         Statement stmt=null;
         try {
@@ -123,38 +132,10 @@ public class DataBase {
         }
     }
 
-//    /**
-//     * init
-//     */
-//    public DataBase(){
-//        c = null;
-//        Statement stmt = null;
-//        try {
-//            Class.forName("org.sqlite.JDBC");
-//            c = DriverManager.getConnection("jdbc:sqlite:D:/t/identifier.sqlite");
-//        } catch ( Exception e ) {
-//            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
-//        }
-//        if(IsTableExist(c)==false){
-//            CreateTable(c);
-//        }
+//    public static void main( String args[] ) throws SQLException {
+//        DatabaseInit();
+//        int result=Login(c,"kkfine","kkfine");
+//        System.out.println(result);
 //    }
 
-    public static void main( String args[] ) throws SQLException {
-//        DatabaseInit();/*sqlite*/
-//        Connection c = null;
-//        Statement stmt = null;
-//        /*连接到数据库*/
-//        try {
-//            Class.forName("org.sqlite.JDBC");
-//            c = DriverManager.getConnection("jdbc:sqlite:D:/t/identifier.sqlite");
-//        } catch ( Exception e ) {
-//            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
-//        }
-//        System.out.println(IsTableExist(c));
-
-
-//        int result=Register(c,"Tip5y","Test", "127.0.0.1", "MACBADS");
-//        System.out.println(result);
-    }
 }

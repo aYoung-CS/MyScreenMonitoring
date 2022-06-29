@@ -1,5 +1,7 @@
 package protocol;
 
+import src.myutil.Result;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -7,63 +9,52 @@ import java.util.Base64;
 
 
 public class Protocol {
-    public static int TYPE_REGISTER=1; // ±íÊ¾¿Í»§¶Ë×¢²á
-    public static int TYPE_LOGIN=2;    // ±íÊ¾¿Í»§¶ËµÇÂ¼
-    public static int TYPE_LOGOUT=3;  // ±íÊ¾µÇ³ö
-    public static int TYPE_IMAGE=4;   // ±íÊ¾·¢ËÍµÄÊÇÆÁÄ»Í¼Æ¬Êı¾İ
-    public static int TYPE_USER=5;    // ±íÊ¾´«ÊäĞ­ÒéÖĞ Êı¾İ×Ö¶Î¹ØÓÚuserÓÃ»§µÄĞÅÏ¢µÄ±êÖ¾Î»£¬ÖµÎªuserÀàµÄĞòÁĞ»¯Êı¾İ
-    public static int TYPE_RESULT=6;  //±íÊ¾´«ÊäĞ­ÒéÖĞ Êı¾İ×Ö¶Î¹ØÓÚ·şÎñ¶Ë¶ÔÓÚÓÃ»§µÇÂ½×¢²áµÄÏìÓ¦±êÖ¾Î»
+    public static int TYPE_REGISTER=1; // è¡¨ç¤ºå®¢æˆ·ç«¯æ³¨å†Œ
+    public static int TYPE_LOGIN=2;    // è¡¨ç¤ºå®¢æˆ·ç«¯ç™»å½•
+    public static int TYPE_LOGOUT=3;  // è¡¨ç¤ºç™»å‡º
+    public static int TYPE_IMAGE=4;   // è¡¨ç¤ºå‘é€çš„æ˜¯å±å¹•å›¾ç‰‡æ•°æ®
+    public static int TYPE_RESULT=6;  //è¡¨ç¤ºä¼ è¾“åè®®ä¸­ æ•°æ®å­—æ®µå…³äºæœåŠ¡ç«¯å¯¹äºç”¨æˆ·ç™»é™†æ³¨å†Œçš„å“åº”æ ‡å¿—ä½
 
-    public static int getTypeImage() {
-        return TYPE_IMAGE;
-    }
-    public static int getTypeLogin() {
-        return TYPE_LOGIN;
-    }
-    public static int getTypeLogout() {
-        return TYPE_LOGOUT;
-    }
-    public static int getTypeRegister() {
-        return TYPE_REGISTER;
-    }
-    public static int getTypeResult() {
-        return TYPE_RESULT;
-    }
-    public static int getTypeUser() {
-        return TYPE_USER;
-    }
-
-
-    public static void send(int type, DataOutputStream dos, byte[] data) throws IOException {
+    public static void send(int type, DataOutputStream dos,byte[] data) throws IOException {
 //        System.out.println(data.length);
+        System.out.println("send");
         int TotalLen = 1+4+data.length;
 //        System.out.println(TotalLen);
         try {
+            System.out.println("type:" + type );
+            System.out.println("DataOutputStream object " + dos);
+
             dos.writeByte(type);
             dos.writeInt(TotalLen);
+
+            System.out.println("TotalLen:" + TotalLen);
             dos.write(data);
             dos.flush();
         } catch (Exception e) {
-            System.exit(0);
+            e.printStackTrace();
+            System.out.println("send is wrong");
         }
     }
+
 
     public static Result getResult(DataInputStream dis){
 
         try {
             byte type = dis.readByte();
-            System.out.println("type is " + type);
+//            System.out.println("type is " + type);
+
             int totalLen=dis.readInt();
-            System.out.println("totalLen is " + totalLen);
+//            System.out.println("totalLen is " + totalLen);
             byte[] bytes=new byte[totalLen-4-1];
+
             System.out.println(bytes.length);
             dis.readFully(bytes);
             return new Result(type&0xFF,totalLen,bytes);
         } catch (IOException e) {
             // TODO Auto-generated catch block
+            e.printStackTrace();
             System.out.println("getResult is wrong");
         }
         return null;
     }
-
 }

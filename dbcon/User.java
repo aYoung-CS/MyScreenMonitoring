@@ -11,10 +11,28 @@ public class User implements Serializable {
     public String severIP;
     public String SeverPort;
     public byte[] imageData;
-
+    public String ClientMonitor;
+    public String Status;
     public User(){
 
     }
+
+    public void setStatus(String status) {
+        Status = status;
+    }
+
+    public String getStatus() {
+        return Status;
+    }
+
+    public void setClientMonitor(String clientMonitor) {
+        ClientMonitor = clientMonitor;
+    }
+
+    public String getClientMonitor() {
+        return ClientMonitor;
+    }
+
     public String getClientIP() {
         return ClientIP;
     }

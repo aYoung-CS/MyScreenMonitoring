@@ -1,10 +1,14 @@
 package client;
 
 
+import dbcon.User;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
@@ -13,15 +17,17 @@ import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import protocol.Protocol;
 
+import java.awt.*;
+import java.io.*;
+import java.net.Socket;
 
 
 //public String User;
 
-public class ClientView extends Application {
-//    public static void ClientView(String[] args){
-//        Application.launch(args);
-//    }
+public class ClientView extends Application{
+
 //    相关变量
 
     public String Username;
@@ -35,9 +41,14 @@ public class ClientView extends Application {
     public String SeverPort;
     public int ClientFluent;
     public int type;
+    private static Socket socket;
+    private static DataOutputStream dos = null;
 
-
-
+    public static void ClientView(String[] args,DataOutputStream os,Socket soc){
+        Application.launch(args);
+        dos = os;
+        socket = soc;
+    }
     @Override
     public void start(Stage Client) throws Exception {
         System.out.println("start...");
@@ -265,6 +276,7 @@ public class ClientView extends Application {
         Scene ClientMonitor = new Scene(pane4,800,600);
         Client.setScene(ClientHome);
 
+
 //按钮点击事件
         button1.setOnAction(event -> {
             Client.setScene(SignIn);
@@ -281,11 +293,29 @@ public class ClientView extends Application {
             Password = passwordField1.getText();
             type = 1;
 //测试
-            System.out.println(Username);
-            System.out.println(severIP);
-            System.out.println(severPort);
-            System.out.println(Password);
-            System.out.println(type);
+//            System.out.println(Username);
+//            System.out.println(severIP);
+//            System.out.println(severPort);
+//            System.out.println(Password);
+//            System.out.println(type);
+            User LoginUser = new User();
+            LoginUser.setUsername(Username);
+            LoginUser.setPassword(Password);
+            LoginUser.setClientIP(severIP);
+            LoginUser.setSeverPort(severPort);
+            try {
+                client.Client.sendUser(Protocol.TYPE_LOGIN,LoginUser);
+                String res = client.Client.GetMsg();
+                if(res.equals("login fail")){
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle(null);
+                    alert.setHeaderText(null);
+                    alert.setContentText(res);
+                    alert.showAndWait();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
             Client.setScene(ClientMonitor);
         });
@@ -344,7 +374,7 @@ public class ClientView extends Application {
 
 
     @Override
-    public void init() throws Exception {
+    public  void init() throws Exception {
         super.init();
         System.out.println("init...");
     }
