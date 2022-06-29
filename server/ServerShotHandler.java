@@ -88,14 +88,19 @@ public class ServerShotHandler implements Runnable{
                         System.out.println("login success");
                         msg = "success".getBytes(StandardCharsets.UTF_8);
                     } else if (res == 0) { //failed
-                        System.out.println("fail");
+                        System.out.println("login fail");
                         msg = "fail".getBytes(StandardCharsets.UTF_8);
                     }
                     Protocol.send(Protocol.TYPE_LOGIN, dos, msg);
                     dos.flush();
                 } else if (type == Protocol.TYPE_LOGOUT) {
-                    System.out.println("User" + user.getUsername() + "logout");
+                    System.out.println("User " + user.getUsername() + " logout");
+                    msg = "logout".getBytes(StandardCharsets.UTF_8);
+                    Protocol.send(Protocol.TYPE_LOGOUT, dos, msg);
                     socket.close();
+                    dos.close();
+                    dis.close();
+                    break;
                 } else if (type == Protocol.TYPE_IMAGE) {
 
                 }

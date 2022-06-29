@@ -114,22 +114,26 @@ public class Client {
 		try {
 			switch (type){
 				case 1:
+					System.out.println("client register");
 					Protocol.send(Protocol.TYPE_REGISTER,dos,data);
 					break;
 				case 2:
+					System.out.println("client login");
 					Protocol.send(Protocol.TYPE_LOGIN,dos,data);
 					break;
 				case 3:
+					System.out.println("client logout");
 					Protocol.send(Protocol.TYPE_LOGOUT,dos,data);
 					break;
 				case 4:
+					System.out.println("client send image");
 					Protocol.send(Protocol.TYPE_IMAGE,dos,data);
 					break;
 				default:
 					break;
 			}
 		}catch (Exception e){
-
+			System.out.println("error in senduser");
 		}
 	}
 
@@ -184,22 +188,26 @@ public class Client {
 		client.connect();
 		User user = new User();
 		user.setUsername("ayoung12");
-		user.setPassword("ayoung122");
+		user.setPassword("ayoung1");
 
 		DataInputStream dis;
 		Result result ;
 
-		client.sendUser(Protocol.TYPE_REGISTER,user);
+
+		client.sendUser(Protocol.TYPE_REGISTER, user);
 		dis = new DataInputStream(client.socket.getInputStream());
 		result = Protocol.getResult(dis);
 		System.out.println(new String(result.getData(), "UTF-8"));
 
+		Thread.sleep(1000);
+
 		client.sendUser(Protocol.TYPE_LOGIN,user);
-		System.out.println("1");
 		result = Protocol.getResult(dis);
-		System.out.println("3");
 		System.out.println(new String(result.getData(), "UTF-8"));
 
+		client.sendUser(Protocol.TYPE_LOGOUT,user);
+		result = Protocol.getResult(dis);
+		System.out.println(new String(result.getData(), "UTF-8"));
 
 		/*
 		client.load();// µÇÂ¼
