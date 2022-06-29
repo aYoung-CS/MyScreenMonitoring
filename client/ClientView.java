@@ -68,6 +68,10 @@ public class ClientView extends Application {
         Button button6 = new Button("    取消   ");
         button6.setLayoutX(410);
         button6.setLayoutY(500);
+//客户端界面按钮
+        Button button7 = new Button("    退出   ");
+        button7.setLayoutX(300);
+        button7.setLayoutY(400);
 
 //CreateLabel
 //登录标签
@@ -114,6 +118,11 @@ public class ClientView extends Application {
         Label label11 = new Label("SeverPort");
         label11.setLayoutX(250);
         label11.setLayoutY(450);
+
+//客户端界面标签
+        Label label12 = new Label("监控频率");
+        label12.setLayoutX(250);
+        label12.setLayoutY(300);
 
 //CreateTextField
 //登录文本框
@@ -184,6 +193,16 @@ public class ClientView extends Application {
             System.out.println(SeverPort);
         });
 
+//客户端界面文本框
+        TextField textField9 = new TextField ();
+        textField9.setLayoutX(340);
+        textField9.setLayoutY(300);
+
+        textField9.setOnAction((ActionEvent e) -> {
+            ClientFluent = Integer.parseInt(textField9.getText());
+            System.out.println(ClientFluent);
+        });
+
 
 //CreatepasswordField
 //登录密码框
@@ -238,7 +257,7 @@ public class ClientView extends Application {
         pane1.getChildren().addAll(button1,button2);
         pane2.getChildren().addAll(button3,button4,label1,label2,label3,label4,textField1,textField2,textField3,passwordField1);
         pane3.getChildren().addAll(button5,button6,label5,label6,label7,label8,label9,label10,label11,textField4,textField5,textField6,textField7,textField8,passwordField2,passwordField3,text1,text2);
-
+        pane4.getChildren().addAll(button7,label12,textField9);
 //CreateScene
         Scene ClientHome = new Scene(pane1,800,600);
         Scene SignIn = new Scene(pane2,800,600);
@@ -254,6 +273,7 @@ public class ClientView extends Application {
         button2.setOnAction(event -> {
             Client.setScene(Register);
         });
+
         button3.setOnAction(event -> {
             Username = textField1.getText();
             severIP = textField2.getText();
@@ -269,10 +289,10 @@ public class ClientView extends Application {
 
             Client.setScene(ClientMonitor);
         });
+
         button4.setOnAction(event -> {
             Client.setScene(ClientHome);
         });
-
 
         button5.setOnAction(event -> {
 
@@ -302,6 +322,10 @@ public class ClientView extends Application {
         });
 
         button6.setOnAction(event -> {
+            Client.setScene(ClientHome);
+        });
+
+        button7.setOnAction(event -> {
             Client.setScene(ClientHome);
         });
 
