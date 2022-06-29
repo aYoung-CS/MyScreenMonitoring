@@ -4,10 +4,7 @@ package client;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
@@ -17,7 +14,7 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
-import static java.awt.SystemColor.text;
+
 
 //public String User;
 
@@ -44,6 +41,8 @@ public class ClientView extends Application {
     @Override
     public void start(Stage Client) throws Exception {
         System.out.println("start...");
+
+
 //CreateButton
 //首页按钮
         Button button1 = new Button("  登录  ");
@@ -209,6 +208,7 @@ public class ClientView extends Application {
         passwordField2.setOnAction((ActionEvent e) -> {
             Password = passwordField2.getText();
             System.out.println(Password);
+
         });
 
         passwordField3.setOnAction((ActionEvent e) -> {
@@ -216,6 +216,19 @@ public class ClientView extends Application {
             System.out.println(repwd);
         });
 
+//注册密码判断是否一致
+        Text text1 = new Text("");
+        Font font1 = Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 12);
+        text1.setFont(font1);
+        text1.setLayoutX(550);
+        text1.setLayoutY(220);
+        text1.setFill(Color.BROWN);
+        Text text2 = new Text("");
+        Font font2 = Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 12);
+        text2.setFont(font2);
+        text2.setLayoutX(550);
+        text2.setLayoutY(270);
+        text2.setFill(Color.BROWN);
 
 //CreatePane
         AnchorPane pane1 = new AnchorPane();//首页布局
@@ -224,7 +237,7 @@ public class ClientView extends Application {
         AnchorPane pane4 = new AnchorPane();//客户端监控界面布局
         pane1.getChildren().addAll(button1,button2);
         pane2.getChildren().addAll(button3,button4,label1,label2,label3,label4,textField1,textField2,textField3,passwordField1);
-        pane3.getChildren().addAll(button5,button6,label5,label6,label7,label8,label9,label10,label11,textField4,textField5,textField6,textField7,textField8,passwordField2,passwordField3);
+        pane3.getChildren().addAll(button5,button6,label5,label6,label7,label8,label9,label10,label11,textField4,textField5,textField6,textField7,textField8,passwordField2,passwordField3,text1,text2);
 
 //CreateScene
         Scene ClientHome = new Scene(pane1,800,600);
@@ -259,12 +272,8 @@ public class ClientView extends Application {
         button4.setOnAction(event -> {
             Client.setScene(ClientHome);
         });
-        Text text=new Text();
-        Font font = Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 10);
-        text.setFont(font);
-        text.setTranslateX(15);
-        text.setTranslateY(125);
-        text.setFill(Color.BROWN);
+
+
         button5.setOnAction(event -> {
 
             Username = textField4.getText();
@@ -275,10 +284,10 @@ public class ClientView extends Application {
             Password = passwordField2.getText();
             repwd = passwordField3.getText();
             type = 0;
-            text.setText("Your password is incorrect!");
-            if(!Password.equals("abc123")){
 
-                text.setText("Your password is incorrect!");
+            if(!Password.equals(repwd)) {
+                text1.setText("密码不一致");
+                text2.setText("密码不一致");
             }
 //测试
             System.out.println(Username);
@@ -291,6 +300,7 @@ public class ClientView extends Application {
             System.out.println(type);
 
         });
+
         button6.setOnAction(event -> {
             Client.setScene(ClientHome);
         });
