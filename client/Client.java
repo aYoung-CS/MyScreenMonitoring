@@ -193,12 +193,12 @@ public class Client {
 		dis = new DataInputStream(client.socket.getInputStream());
 		result = Protocol.getResult(dis);
 		System.out.println(new String(result.getData(), "UTF-8"));
-//
-//		client.sendUser(Protocol.TYPE_LOGIN,user);
-//		System.out.println("1");
-//		result = Protocol.getResult(dis);
-//		System.out.println("3");
-//		System.out.println(new String(result.getData(), "UTF-8"));
+
+		client.sendUser(Protocol.TYPE_LOGIN,user);
+		System.out.println("1");
+		result = Protocol.getResult(dis);
+		System.out.println("3");
+		System.out.println(new String(result.getData(), "UTF-8"));
 
 
 		/*

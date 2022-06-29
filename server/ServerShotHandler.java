@@ -54,8 +54,6 @@ public class ServerShotHandler implements Runnable{
         while (true) {
             try {
                 Result result = Protocol.getResult(dis);
-//                if(result == null)
-//                    continue;
                 System.out.println(result + "-----");
                 int type = result.getType();
                 User user = DeserializeData(result.getData());
