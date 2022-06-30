@@ -138,7 +138,7 @@ public class Client {
 	}
 
 	/**
-	 *
+	 * –Ú¡–ªØ
 	 * @param user
 	 * @return
 	 * @throws IOException

@@ -67,29 +67,35 @@ public class ServerShotHandler implements Runnable{
                 int res;
                 byte[] msg = null;
                 System.out.println("type: " + type);
+
                 if (type == Protocol.TYPE_REGISTER) {
                     res = DataBase.Register(user.getUsername(), user.getPassword(), user.getClientIP(), user.getClientMac());
-                    if (res == 2) { //用户名重复
-                        msg = "username repeat".getBytes(StandardCharsets.UTF_8);
-                    } else if (res == 1) { //注册成功
-                        msg = "success".getBytes(StandardCharsets.UTF_8);
-                    } else if (res == 0) { //注册错误
-                        msg = "fail".getBytes(StandardCharsets.UTF_8);
+                    switch(res){
+                        case 0:
+                            msg = "fail".getBytes(StandardCharsets.UTF_8);
+                            break;
+                        case 1:
+                            msg = "success".getBytes(StandardCharsets.UTF_8);
+                            break;
+                        case 2:
+                            msg = "username repeat".getBytes(StandardCharsets.UTF_8);
+                            break;
+                        default:
+                            break;
                     }
-
-                    System.out.println("dos:"+dos);
-                    System.out.println("22222");
                     Protocol.send(Protocol.TYPE_LOGIN, dos, msg);
                     dos.flush();
                 } else if (type == Protocol.TYPE_LOGIN) {
                     res = DataBase.Login(user.getUsername(), user.getPassword());
-
-                    if (res == 1) { //success
-                        System.out.println("login success");
-                        msg = "success".getBytes(StandardCharsets.UTF_8);
-                    } else if (res == 0) { //failed
-                        System.out.println("login fail");
-                        msg = "fail".getBytes(StandardCharsets.UTF_8);
+                    switch (res){
+                        case 0:
+                            System.out.println("login fail");
+                            break;
+                        case 1:
+                            msg = "success".getBytes(StandardCharsets.UTF_8);
+                            break;
+                        default:
+                            break;
                     }
                     Protocol.send(Protocol.TYPE_LOGIN, dos, msg);
                     dos.flush();
