@@ -1,10 +1,12 @@
 package client;
 
+import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 import dbcon.User;
 import protocol.Protocol;
 import protocol.Result;
 
 import javax.imageio.ImageIO;
+import javax.swing.plaf.synth.SynthOptionPaneUI;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -29,7 +31,9 @@ public class Client {
 	public String Username;
 	public String repwd;
 	public Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-	DataOutputStream dos = null;
+	public DataOutputStream dos;
+	public DataInputStream dis;
+	public Result result;
 
 
 	/**
@@ -57,6 +61,7 @@ public class Client {
 		try{
 			socket = new Socket(serverIP, serverPort);
 			dos = new DataOutputStream(socket.getOutputStream());
+			dis = new DataInputStream(socket.getInputStream());
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -182,32 +187,34 @@ public class Client {
 
 	}
 
+	/**
+	 * 获取服务端返回消息
+	 * @return msg
+	 */
+	public String getMsg() throws UnsupportedEncodingException {
+		result = Protocol.getResult(dis);
+		return new String(result.getData(), "UTF-8");
+	}
+
 	public static void main(String[] args) throws IOException, InterruptedException {
 
 		final Client client = new Client();
 		client.connect();
+
 		User user = new User();
 		user.setUsername("ayoung12");
 		user.setPassword("ayoung1");
 
-		DataInputStream dis;
-		Result result ;
 
 
 		client.sendUser(Protocol.TYPE_REGISTER, user);
-		dis = new DataInputStream(client.socket.getInputStream());
-		result = Protocol.getResult(dis);
-		System.out.println(new String(result.getData(), "UTF-8"));
-
-		Thread.sleep(1000);
+		System.out.println(client.getMsg());
 
 		client.sendUser(Protocol.TYPE_LOGIN,user);
-		result = Protocol.getResult(dis);
-		System.out.println(new String(result.getData(), "UTF-8"));
+		System.out.println(client.getMsg());
 
 		client.sendUser(Protocol.TYPE_LOGOUT,user);
-		result = Protocol.getResult(dis);
-		System.out.println(new String(result.getData(), "UTF-8"));
+		System.out.println(client.getMsg());
 
 		/*
 		client.load();// 登录
