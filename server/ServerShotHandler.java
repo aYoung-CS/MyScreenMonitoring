@@ -89,7 +89,7 @@ public class ServerShotHandler implements Runnable{
                     res = DataBase.Login(user.getUsername(), user.getPassword());
                     switch (res){
                         case 0:
-                            System.out.println("login fail");
+                            msg = "fail".getBytes(StandardCharsets.UTF_8);
                             break;
                         case 1:
                             msg = "success".getBytes(StandardCharsets.UTF_8);
@@ -101,8 +101,6 @@ public class ServerShotHandler implements Runnable{
                     dos.flush();
                 } else if (type == Protocol.TYPE_LOGOUT) {
                     System.out.println("User " + user.getUsername() + " logout");
-                    msg = "logout".getBytes(StandardCharsets.UTF_8);
-                    Protocol.send(Protocol.TYPE_LOGOUT, dos, msg);
                     socket.close();
                     dos.close();
                     dis.close();

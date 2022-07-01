@@ -1,5 +1,8 @@
 package dbcon;
 
+import javax.xml.crypto.Data;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.Serializable;
 
 public class User implements Serializable {
@@ -8,8 +11,8 @@ public class User implements Serializable {
     public String RePassword;
     public String ClientIP;
     public String ClientMac;
-    public String severIP;
-    public String SeverPort;
+    public String ServerIP;
+    public String ServerPort;
     public byte[] imageData;
 
     public User(){
@@ -23,8 +26,8 @@ public class User implements Serializable {
         ClientIP = clientIP;
     }
 
-    public String getSeverIP() {
-        return severIP;
+    public String getServerIP() {
+        return ServerIP;
     }
 
     public String getClientMac() {
@@ -35,8 +38,8 @@ public class User implements Serializable {
         return Password;
     }
 
-    public String getSeverPort() {
-        return SeverPort;
+    public String getServerPort() {
+        return ServerPort;
     }
 
     public String getUsername() {
@@ -55,16 +58,17 @@ public class User implements Serializable {
         return RePassword == this.Password;
     }
 
-    public void setSeverIP(String severIP) {
-        this.severIP = severIP;
+    public void setServerIP(String serverIP) {
+        ServerIP = serverIP;
     }
 
 
-    public void setSeverPort(String severPort) {
-        SeverPort = severPort;
+    public void setServerPort(String serverPort) {
+        ServerPort = serverPort;
     }
 
     public void setUsername(String username) {
         Username = username;
     }
+
 }

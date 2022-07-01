@@ -1,10 +1,15 @@
 package client;
 
-
+import dbcon.User;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
@@ -13,34 +18,56 @@ import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
+import protocol.Protocol;
+import server.ServerView;
 
+import java.io.*;
+import java.net.InetAddress;
+import java.net.Socket;
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.image.BufferedImage;
+import java.net.URL;
+import java.util.HashMap;
 
 
 //public String User;
 
 public class ClientView extends Application {
-//    public static void ClientView(String[] args){
-//        Application.launch(args);
-//    }
+    public static void ClientView(String[] args){
+        Application.launch(args);
+    }
 //    相关变量
 
     public String Username;
     public String Password;
-    public String severIP;
-    public String severPort;
     public String repwd;
     public String ClientIP;
     public String ClientMac;
-    public String SeverIP;
-    public String SeverPort;
+    public String ServerIP;
+    public String ServerPort;
     public int ClientFluent;
     public int type;
-
-
-
+    private TrayIcon trayIcon;
+    private static Socket socket;
+    private static DataOutputStream dos = null;
+    private static DataInputStream dis = null;
+    private int signA=0;//用于
+    private int signB=0;
+    public static User user;
+    public static void ClientView(String[] args, User user1){
+        user = user1;
+        Application.launch(args);
+    }
     @Override
     public void start(Stage Client) throws Exception {
         System.out.println("start...");
+
 
 
 //CreateButton
@@ -83,11 +110,11 @@ public class ClientView extends Application {
         label2.setLayoutX(250);
         label2.setLayoutY(250);
 
-        Label label3 = new Label("severIP");
+        Label label3 = new Label("serverIP");
         label3.setLayoutX(250);
         label3.setLayoutY(300);
 
-        Label label4 = new Label("severPort");
+        Label label4 = new Label("serverPort");
         label4.setLayoutX(250);
         label4.setLayoutY(350);
 //注册标签
@@ -111,11 +138,11 @@ public class ClientView extends Application {
         label9.setLayoutX(250);
         label9.setLayoutY(350);
 
-        Label label10 = new Label("SeverIP");
+        Label label10 = new Label("ServerIP");
         label10.setLayoutX(250);
         label10.setLayoutY(400);
 
-        Label label11 = new Label("SeverPort");
+        Label label11 = new Label("ServerPort");
         label11.setLayoutX(250);
         label11.setLayoutY(450);
 
@@ -143,12 +170,12 @@ public class ClientView extends Application {
             System.out.println(Username);
         });
         textField2.setOnAction((ActionEvent e) -> {
-            severIP = textField2.getText();
-            System.out.println(severIP);
+            ServerPort = textField2.getText();
+            System.out.println(ServerIP);
         });
         textField3.setOnAction((ActionEvent e) -> {
-            severPort = textField2.getText();
-            System.out.println(severPort);
+            ServerPort = textField2.getText();
+            System.out.println(ServerPort);
         });
 
 //注册文本框
@@ -185,12 +212,12 @@ public class ClientView extends Application {
             System.out.println(ClientMac);
         });
         textField7.setOnAction((ActionEvent e) -> {
-            SeverIP = textField7.getText();
-            System.out.println(SeverIP);
+            ServerIP = textField7.getText();
+            System.out.println(ServerIP);
         });
         textField8.setOnAction((ActionEvent e) -> {
-            SeverPort = textField8.getText();
-            System.out.println(SeverPort);
+            ServerPort = textField8.getText();
+            System.out.println(ServerPort);
         });
 
 //客户端界面文本框
@@ -235,6 +262,33 @@ public class ClientView extends Application {
             System.out.println(repwd);
         });
 
+// CreateText
+// 登录Text
+        Text text8 = new Text("");
+        Font font8 = Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 12);
+        text8.setFont(font8);
+        text8.setLayoutX(550);
+        text8.setLayoutY(220);
+        text8.setFill(Color.BROWN);
+        Text text9 = new Text("");
+        Font font9 = Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 12);
+        text9.setFont(font9);
+        text9.setLayoutX(550);
+        text9.setLayoutY(270);
+        text9.setFill(Color.BROWN);
+        Text text10 = new Text("");
+        Font font10 = Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 12);
+        text10.setFont(font10);
+        text10.setLayoutX(550);
+        text10.setLayoutY(320);
+        text10.setFill(Color.BROWN);
+        Text text11 = new Text("");
+        Font font11 = Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 12);
+        text11.setFont(font11);
+        text11.setLayoutX(550);
+        text11.setLayoutY(370);
+        text11.setFill(Color.BROWN);
+
 //注册密码判断是否一致
         Text text1 = new Text("");
         Font font1 = Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 12);
@@ -248,6 +302,51 @@ public class ClientView extends Application {
         text2.setLayoutX(550);
         text2.setLayoutY(270);
         text2.setFill(Color.BROWN);
+//注册Text
+        Text text3 = new Text("");
+        Font font3 = Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 12);
+        text3.setFont(font3);
+        text3.setLayoutX(550);
+        text3.setLayoutY(170);
+        text3.setFill(Color.BROWN);
+        Text text4 = new Text("");
+        Font font4 = Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 12);
+        text4.setFont(font4);
+        text4.setLayoutX(550);
+        text4.setLayoutY(320);
+        text4.setFill(Color.BROWN);
+        Text text5 = new Text("");
+        Font font5 = Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 12);
+        text5.setFont(font5);
+        text5.setLayoutX(550);
+        text5.setLayoutY(370);
+        text5.setFill(Color.BROWN);
+        Text text6 = new Text("");
+        Font font6 = Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 12);
+        text6.setFont(font6);
+        text6.setLayoutX(550);
+        text6.setLayoutY(420);
+        text6.setFill(Color.BROWN);
+        Text text7 = new Text("");
+        Font font7 = Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 12);
+        text7.setFont(font7);
+        text7.setLayoutX(550);
+        text7.setLayoutY(470);
+        text7.setFill(Color.BROWN);
+
+
+// 托盘最小化
+//  点关闭不关闭窗口
+        enableTray(Client);
+        Platform.setImplicitExit(false);
+        Client.setOnCloseRequest(new EventHandler<WindowEvent>() {
+
+            @Override
+            public void handle(WindowEvent arg0) {
+                Client.hide();
+            }
+        });
+
 
 //CreatePane
         AnchorPane pane1 = new AnchorPane();//首页布局
@@ -255,8 +354,11 @@ public class ClientView extends Application {
         AnchorPane pane3 = new AnchorPane();//注册界面布局
         AnchorPane pane4 = new AnchorPane();//客户端监控界面布局
         pane1.getChildren().addAll(button1,button2);
-        pane2.getChildren().addAll(button3,button4,label1,label2,label3,label4,textField1,textField2,textField3,passwordField1);
-        pane3.getChildren().addAll(button5,button6,label5,label6,label7,label8,label9,label10,label11,textField4,textField5,textField6,textField7,textField8,passwordField2,passwordField3,text1,text2);
+        pane2.getChildren().addAll(button3,button4,label1,label2,label3,label4,textField1,textField2,textField3,passwordField1,
+                text8,text9,text10,text11);
+        pane3.getChildren().addAll(button5,button6,label5,label6,label7,label8,label9,label10,label11,
+                textField4,textField5,textField6,textField7,textField8,passwordField2,passwordField3,
+                text1,text2,text3,text4,text5,text6,text7);
         pane4.getChildren().addAll(button7,label12,textField9);
 //CreateScene
         Scene ClientHome = new Scene(pane1,800,600);
@@ -275,19 +377,79 @@ public class ClientView extends Application {
         });
 
         button3.setOnAction(event -> {
-            Username = textField1.getText();
-            severIP = textField2.getText();
-            severPort = textField3.getText();
-            Password = passwordField1.getText();
-            type = 1;
+            text8.setText("");
+            text9.setText("");
+            text10.setText("");
+            text11.setText("");
+            if(textField1.getText().equals("")||textField1.getText()==null){
+                text8.setText("用户名不能为空");
+            }else{
+                signA++;
+            }
+            if(passwordField1.getText().equals("")||passwordField1.getText()==null){
+                text9.setText("密码不能为空");
+            }else{
+                signA++;
+            }
+            if(textField2.getText().equals("")||textField2.getText()==null){
+                text10.setText("主机IP不能为空");
+            }else{
+                signA++;
+            }
+            if(textField3.getText().equals("")||textField3.getText()==null){
+                text11.setText("主机Mac不能为空");
+            }else{
+                signA++;
+            }
+            if(signA ==4){
+                Username = textField1.getText();
+                ServerIP = textField2.getText();
+                ServerPort = textField3.getText();
+                Password = passwordField1.getText();
+                type = 1;
+                signA++;
+            }
+            if(signA == 5){
+
+                user.setUsername(Username);
+                user.setPassword(Password);
+                user.setServerIP(ServerIP);
+                user.setServerPort(ServerPort);
+                HashMap con = client.Client.connect(user);
+                socket = (Socket) con.get("socket");
+                dos = (DataOutputStream) con.get("dos");
+                dis = (DataInputStream) con.get("dis");
+
+                try {
+                    client.Client.login(user, dos);
+                    String res = client.Client.getMsg(dis);
+                    System.out.println(res);
+                    if(res.equals("fail")){
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                        alert.setTitle(null);
+                        alert.setHeaderText(null);
+                        alert.setContentText("Login Fail");
+                        alert.showAndWait();
+                    }else{
+                        Client.setScene(ClientMonitor);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            signA = 0;
+// 清空文本框内容
+            textField1.clear();
+            textField2.clear();
+            textField3.clear();
+            passwordField1.clear();
+
 //测试
             System.out.println(Username);
-            System.out.println(severIP);
-            System.out.println(severPort);
+            System.out.println(ServerIP);
+            System.out.println(ServerPort);
             System.out.println(Password);
             System.out.println(type);
-
-            Client.setScene(ClientMonitor);
         });
 
         button4.setOnAction(event -> {
@@ -295,26 +457,116 @@ public class ClientView extends Application {
         });
 
         button5.setOnAction(event -> {
+            text1.setText("");
+            text2.setText("");
+            text3.setText("");
+            text4.setText("");
+            text5.setText("");
+            text6.setText("");
+            text7.setText("");
 
-            Username = textField4.getText();
-            ClientIP = textField5.getText();
-            ClientMac = textField6.getText();
-            SeverIP = textField7.getText();
-            SeverPort = textField8.getText();
-            Password = passwordField2.getText();
-            repwd = passwordField3.getText();
-            type = 0;
-
-            if(!Password.equals(repwd)) {
+            if(textField4.getText().equals("")||textField4.getText()==null){
+                text3.setText("用户名不能为空");
+            }else{
+                signB++;
+            }
+            if(passwordField2.getText().equals("")||passwordField2.getText()==null){
+                text1.setText("密码不能为空");
+            }else{
+                signB++;
+            }
+            if(passwordField3.getText().equals("")||passwordField3.getText()==null){
+                text2.setText("密码不能为空");
+            }else {
+                signB++;
+            }
+            if(!passwordField2.getText().equals(passwordField3.getText())) {
                 text1.setText("密码不一致");
                 text2.setText("密码不一致");
+            }else{
+                signB++;
             }
+            if(textField5.getText().equals("")||textField5.getText()==null){
+                text4.setText("主机IP不能为空");
+            }else{
+                signB++;
+            }
+            if(textField6.getText().equals("")||textField6.getText()==null){
+                text5.setText("主机Mac不能为空");
+            }else{
+                signB++;
+            }
+            if(textField7.getText().equals("")||textField7.getText()==null){
+                text6.setText("ServerIP不能为空");
+            }else{
+                signB++;
+            }
+            if(textField8.getText().equals("")||textField8.getText()==null){
+                text7.setText("ServerIP不能为空");
+            }else{
+                signB++;
+            }
+            if(signB == 8){
+                Username = textField4.getText();
+                ClientIP = textField5.getText();
+                ClientMac = textField6.getText();
+                ServerIP = textField7.getText();
+                ServerPort = textField8.getText();
+                Password = passwordField2.getText();
+                repwd = passwordField3.getText();
+                type = 0;
+                signB++;
+            }
+            if(signB == 9){
+                user.setUsername(Username);
+                user.setPassword(Password);
+                user.setClientIP(user.getClientIP());
+                user.setClientMac(user.getClientMac());
+                user.setServerIP(ServerIP);
+                user.setServerPort(ServerPort);
+                System.out.println(user.getUsername());
+                try {
+                    client.Client.register(user, dos);
+                    String res = client.Client.getMsg(dis);
+                    System.out.println(res);
+                    if(res.equals("fail")){
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                        alert.setTitle(null);
+                        alert.setHeaderText(null);
+                        alert.setContentText("Register Fail");
+                        alert.showAndWait();
+                    }else if(res.equals("username repeat")){
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                        alert.setTitle(null);
+                        alert.setHeaderText(null);
+                        alert.setContentText("Username Repeat");
+                        alert.showAndWait();
+                    } else{
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                        alert.setTitle(null);
+                        alert.setHeaderText(null);
+                        alert.setContentText("Register Success");
+                        alert.showAndWait();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            signB = 0;
+//清空文本框内容
+            textField4.clear();
+            textField5.clear();
+            textField6.clear();
+            textField7.clear();
+            textField8.clear();
+            passwordField2.clear();
+            passwordField3.clear();
 //测试
             System.out.println(Username);
             System.out.println(ClientIP);
             System.out.println(ClientMac);
-            System.out.println(SeverIP);
-            System.out.println(SeverPort);
+            System.out.println(ServerIP);
+            System.out.println(ServerPort);
             System.out.println(Password);
             System.out.println(repwd);
             System.out.println(type);
@@ -326,20 +578,128 @@ public class ClientView extends Application {
         });
 
         button7.setOnAction(event -> {
+
+            try {
+                client.Client.logout(user, dos, dis);
+                System.out.println("logout");
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle(null);
+                alert.setHeaderText(null);
+                alert.setContentText("Logout");
+                alert.showAndWait();
+                Client.setScene(ClientMonitor);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
             Client.setScene(ClientHome);
         });
 
 
 
 //        stage.setScene(Client.scene);
-        Client.setTitle("远程桌面监控");
-//        Client.setWidth(800);
-//        Client.setHeight(600);
+        Client.setTitle("远程桌面监控客户端");
         Client.getIcons().add(new Image("file:img/1.jpeg"));
         Client.show();
 
     }
 
+    private void enableTray(final Stage stage) {
+        PopupMenu popupMenu = new PopupMenu();
+        java.awt.MenuItem openItem = new java.awt.MenuItem("显示");
+        java.awt.MenuItem hideItem = new java.awt.MenuItem("最小化");
+        java.awt.MenuItem quitItem = new java.awt.MenuItem("退出");
+
+        ActionListener acl = new ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+                java.awt.MenuItem item = (java.awt.MenuItem) e.getSource();
+                Platform.setImplicitExit(false); //多次使用显示和隐藏设置false
+
+                if (item.getLabel().equals("退出")) {
+                    SystemTray.getSystemTray().remove(trayIcon);
+                    Platform.exit();
+                    return;
+                }
+                if (item.getLabel().equals("显示")) {
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            stage.show();
+                        }
+                    });
+                }
+                if (item.getLabel().equals("最小化")) {
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            stage.hide();
+                        }
+                    });
+                }
+
+            }
+
+        };
+
+        //双击事件方法
+        MouseListener sj = new MouseListener() {
+            public void mouseReleased(MouseEvent e) {
+            }
+            public void mousePressed(MouseEvent e) {
+            }
+            public void mouseExited(MouseEvent e) {
+            }
+            public void mouseEntered(MouseEvent e) {
+            }
+            public void mouseClicked(MouseEvent e) {
+                Platform.setImplicitExit(false); //多次使用显示和隐藏设置false
+                if (e.getClickCount() == 2) {
+                    if (stage.isShowing()) {
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                stage.hide();
+                            }
+                        });
+                    }else{
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                stage.show();
+                            }
+                        });
+                    }
+                }
+            }
+        };
+
+
+
+        openItem.addActionListener(acl);
+        quitItem.addActionListener(acl);
+        hideItem.addActionListener(acl);
+
+        popupMenu.add(openItem);
+        popupMenu.add(hideItem);
+        popupMenu.add(quitItem);
+
+        try {
+            SystemTray tray = SystemTray.getSystemTray();
+            BufferedImage image = ImageIO.read(this.getClass().getResourceAsStream("1.gif"));
+//            System.out.println(image);
+//            Client.getIcons().add(new Image("file:img/1.jpeg"));
+//            ServletContext. getResourceAsStream(String path)
+            trayIcon = new TrayIcon(image, "远程桌面监控客户端", popupMenu);
+            trayIcon.setToolTip("远程桌面监控客户端");
+            tray.add(trayIcon);
+            trayIcon.addMouseListener(sj);
+
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
 
 
