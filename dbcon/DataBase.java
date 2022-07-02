@@ -1,6 +1,7 @@
 package dbcon;
 
 import java.sql.*;
+import java.util.Vector;
 
 public class DataBase {
 
@@ -31,6 +32,42 @@ public class DataBase {
             return false;
         }
     }
+
+    public static Vector UserList(Connection c){
+        Vector<User> v = new Vector<User>();
+
+        try {
+            c.setAutoCommit(false);
+            Statement stmt = null;
+            stmt = c.createStatement();
+            ResultSet rs = stmt.executeQuery( "SELECT * FROM USER;" );
+            while ( rs.next() ) {
+                User tmpuser = new User();
+                String id = rs.getString("ID");
+                String username = rs.getString("USERNAME");
+                String ip = rs.getString("IP");
+                String mac = rs.getString("MAC");
+                tmpuser.Username=username;
+                tmpuser.ClientIP=ip;
+                tmpuser.ClientMac=mac;
+                v.add(tmpuser);
+//                System.out.println( "ID = " + id );
+//                System.out.println( "USERNAME = " + username );
+//                System.out.println( "IP = " + ip );
+//                System.out.println( "MAC = " + mac );
+//                System.out.println();
+            }
+            rs.close();
+            stmt.close();
+//            System.out.println(v.get(0).getUsername());
+            return v;
+        } catch ( Exception e ) {
+            System.err.println( e);
+            return null;
+        }
+    }
+
+
 
     public static void CreateTable()/*´´½¨USER±í*/
     {

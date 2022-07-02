@@ -59,6 +59,7 @@ public class ClientView extends Application {
     private static DataInputStream dis = null;
     private int signA=0;//用于
     private int signB=0;
+    private int signC=0;
     public static User user;
     public static void ClientView(String[] args, User user1){
         user = user1;
@@ -90,15 +91,19 @@ public class ClientView extends Application {
 //注册按钮
         Button button5 = new Button("  确认注册  ");
         button5.setLayoutX(290);
-        button5.setLayoutY(500);
+        button5.setLayoutY(400);
 
         Button button6 = new Button("    取消   ");
         button6.setLayoutX(410);
-        button6.setLayoutY(500);
+        button6.setLayoutY(400);
 //客户端界面按钮
         Button button7 = new Button("    退出   ");
         button7.setLayoutX(300);
         button7.setLayoutY(400);
+
+        Button button8 = new Button("    开始监控    ");
+        button8.setLayoutX(400);
+        button8.setLayoutY(400);
 
 //CreateLabel
 //登录标签
@@ -130,21 +135,21 @@ public class ClientView extends Application {
         label7.setLayoutX(250);
         label7.setLayoutY(250);
 
-        Label label8 = new Label("ClientIP");
+        Label label8 = new Label("ServerIP");
         label8.setLayoutX(250);
         label8.setLayoutY(300);
 
-        Label label9 = new Label("ClientMac");
+        Label label9 = new Label("ServerPort");
         label9.setLayoutX(250);
         label9.setLayoutY(350);
 
-        Label label10 = new Label("ServerIP");
-        label10.setLayoutX(250);
-        label10.setLayoutY(400);
-
-        Label label11 = new Label("ServerPort");
-        label11.setLayoutX(250);
-        label11.setLayoutY(450);
+//        Label label10 = new Label("ServerIP");
+//        label10.setLayoutX(250);
+//        label10.setLayoutY(400);
+//
+//        Label label11 = new Label("ServerPort");
+//        label11.setLayoutX(250);
+//        label11.setLayoutY(450);
 
 //客户端界面标签
         Label label12 = new Label("监控频率");
@@ -165,18 +170,18 @@ public class ClientView extends Application {
         textField3.setLayoutX(340);
         textField3.setLayoutY(350);
 
-        textField1.setOnAction((ActionEvent e) -> {
-            Username = textField1.getText();
-            System.out.println(Username);
-        });
-        textField2.setOnAction((ActionEvent e) -> {
-            ServerPort = textField2.getText();
-            System.out.println(ServerIP);
-        });
-        textField3.setOnAction((ActionEvent e) -> {
-            ServerPort = textField2.getText();
-            System.out.println(ServerPort);
-        });
+//        textField1.setOnAction((ActionEvent e) -> {
+//            Username = textField1.getText();
+//            System.out.println(Username);
+//        });
+//        textField2.setOnAction((ActionEvent e) -> {
+//            ServerPort = textField2.getText();
+//            System.out.println(ServerIP);
+//        });
+//        textField3.setOnAction((ActionEvent e) -> {
+//            ServerPort = textField2.getText();
+//            System.out.println(ServerPort);
+//        });
 
 //注册文本框
         TextField textField4 = new TextField ();
@@ -190,35 +195,6 @@ public class ClientView extends Application {
         TextField textField6 = new TextField ();
         textField6.setLayoutX(340);
         textField6.setLayoutY(350);
-
-        TextField textField7 = new TextField ();
-        textField7.setLayoutX(340);
-        textField7.setLayoutY(400);
-
-        TextField textField8 = new TextField ();
-        textField8.setLayoutX(340);
-        textField8.setLayoutY(450);
-
-        textField4.setOnAction((ActionEvent e) -> {
-            Username = textField4.getText();
-            System.out.println(Username);
-        });
-        textField5.setOnAction((ActionEvent e) -> {
-            ClientIP = textField5.getText();
-            System.out.println(ClientIP);
-        });
-        textField6.setOnAction((ActionEvent e) -> {
-            ClientMac = textField6.getText();
-            System.out.println(ClientMac);
-        });
-        textField7.setOnAction((ActionEvent e) -> {
-            ServerIP = textField7.getText();
-            System.out.println(ServerIP);
-        });
-        textField8.setOnAction((ActionEvent e) -> {
-            ServerPort = textField8.getText();
-            System.out.println(ServerPort);
-        });
 
 //客户端界面文本框
         TextField textField9 = new TextField ();
@@ -289,6 +265,14 @@ public class ClientView extends Application {
         text11.setLayoutY(370);
         text11.setFill(Color.BROWN);
 
+//客户端监控Text
+        Text text12 = new Text("");
+        Font font12 = Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 12);
+        text12.setFont(font12);
+        text12.setLayoutX(550);
+        text12.setLayoutY(320);
+        text12.setFill(Color.BROWN);
+
 //注册密码判断是否一致
         Text text1 = new Text("");
         Font font1 = Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 12);
@@ -321,18 +305,6 @@ public class ClientView extends Application {
         text5.setLayoutX(550);
         text5.setLayoutY(370);
         text5.setFill(Color.BROWN);
-        Text text6 = new Text("");
-        Font font6 = Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 12);
-        text6.setFont(font6);
-        text6.setLayoutX(550);
-        text6.setLayoutY(420);
-        text6.setFill(Color.BROWN);
-        Text text7 = new Text("");
-        Font font7 = Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 12);
-        text7.setFont(font7);
-        text7.setLayoutX(550);
-        text7.setLayoutY(470);
-        text7.setFill(Color.BROWN);
 
 
 // 托盘最小化
@@ -356,10 +328,10 @@ public class ClientView extends Application {
         pane1.getChildren().addAll(button1,button2);
         pane2.getChildren().addAll(button3,button4,label1,label2,label3,label4,textField1,textField2,textField3,passwordField1,
                 text8,text9,text10,text11);
-        pane3.getChildren().addAll(button5,button6,label5,label6,label7,label8,label9,label10,label11,
-                textField4,textField5,textField6,textField7,textField8,passwordField2,passwordField3,
-                text1,text2,text3,text4,text5,text6,text7);
-        pane4.getChildren().addAll(button7,label12,textField9);
+        pane3.getChildren().addAll(button5,button6,label5,label6,label7,label8,label9,
+                textField4,textField5,textField6,passwordField2,passwordField3,
+                text1,text2,text3,text4,text5);
+        pane4.getChildren().addAll(button7,button8,label12,textField9,text12);
 //CreateScene
         Scene ClientHome = new Scene(pane1,800,600);
         Scene SignIn = new Scene(pane2,800,600);
@@ -415,10 +387,12 @@ public class ClientView extends Application {
                 user.setPassword(Password);
                 user.setServerIP(ServerIP);
                 user.setServerPort(ServerPort);
-                HashMap con = client.Client.connect(user);
-                socket = (Socket) con.get("socket");
-                dos = (DataOutputStream) con.get("dos");
-                dis = (DataInputStream) con.get("dis");
+                if (socket == null) {
+                    HashMap con = client.Client.connect(user);
+                    socket = (Socket) con.get("socket");
+                    dos = (DataOutputStream) con.get("dos");
+                    dis = (DataInputStream) con.get("dis");
+                }
 
                 try {
                     client.Client.login(user, dos);
@@ -430,6 +404,7 @@ public class ClientView extends Application {
                         alert.setHeaderText(null);
                         alert.setContentText("Login Fail");
                         alert.showAndWait();
+                        Client.setScene(ClientHome);
                     }else{
                         Client.setScene(ClientMonitor);
                     }
@@ -462,8 +437,6 @@ public class ClientView extends Application {
             text3.setText("");
             text4.setText("");
             text5.setText("");
-            text6.setText("");
-            text7.setText("");
 
             if(textField4.getText().equals("")||textField4.getText()==null){
                 text3.setText("用户名不能为空");
@@ -487,37 +460,26 @@ public class ClientView extends Application {
                 signB++;
             }
             if(textField5.getText().equals("")||textField5.getText()==null){
-                text4.setText("主机IP不能为空");
+                text4.setText("ServerIP不能为空");
             }else{
                 signB++;
             }
             if(textField6.getText().equals("")||textField6.getText()==null){
-                text5.setText("主机Mac不能为空");
+                text5.setText("ServerPort不能为空");
             }else{
                 signB++;
             }
-            if(textField7.getText().equals("")||textField7.getText()==null){
-                text6.setText("ServerIP不能为空");
-            }else{
-                signB++;
-            }
-            if(textField8.getText().equals("")||textField8.getText()==null){
-                text7.setText("ServerIP不能为空");
-            }else{
-                signB++;
-            }
-            if(signB == 8){
+
+            if(signB == 6){
                 Username = textField4.getText();
-                ClientIP = textField5.getText();
-                ClientMac = textField6.getText();
-                ServerIP = textField7.getText();
-                ServerPort = textField8.getText();
+                ServerIP = textField5.getText();
+                ServerPort = textField6.getText();
                 Password = passwordField2.getText();
                 repwd = passwordField3.getText();
                 type = 0;
                 signB++;
             }
-            if(signB == 9){
+            if(signB == 7){
                 user.setUsername(Username);
                 user.setPassword(Password);
                 user.setClientIP(user.getClientIP());
@@ -525,6 +487,11 @@ public class ClientView extends Application {
                 user.setServerIP(ServerIP);
                 user.setServerPort(ServerPort);
                 System.out.println(user.getUsername());
+                HashMap con = client.Client.connect(user);
+                socket = (Socket) con.get("socket");
+                dos = (DataOutputStream) con.get("dos");
+                dis = (DataInputStream) con.get("dis");
+
                 try {
                     client.Client.register(user, dos);
                     String res = client.Client.getMsg(dis);
@@ -547,6 +514,7 @@ public class ClientView extends Application {
                         alert.setHeaderText(null);
                         alert.setContentText("Register Success");
                         alert.showAndWait();
+                        Client.setScene(ClientHome);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -557,14 +525,10 @@ public class ClientView extends Application {
             textField4.clear();
             textField5.clear();
             textField6.clear();
-            textField7.clear();
-            textField8.clear();
             passwordField2.clear();
             passwordField3.clear();
 //测试
             System.out.println(Username);
-            System.out.println(ClientIP);
-            System.out.println(ClientMac);
             System.out.println(ServerIP);
             System.out.println(ServerPort);
             System.out.println(Password);
@@ -595,7 +559,36 @@ public class ClientView extends Application {
             Client.setScene(ClientHome);
         });
 
+        button8.setOnAction(event -> {
+            text12.setText("");
 
+            if(textField9.getText().equals("")||textField9.getText()==null){
+                text12.setText("频率不能为空");
+            }else{
+                signC++;
+            }
+            if(signC == 1){
+
+                ClientFluent = Integer.parseInt(textField9.getText());
+                type = 2;
+                signC++;
+            }
+            if(signC == 2){
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle(null);
+                alert.setHeaderText(null);
+                alert.setContentText("开始监控");
+                alert.showAndWait();
+
+
+                type = 2;
+
+            }
+            signC=0;
+            textField9.clear();
+//测试
+            System.out.println(ClientFluent);
+        });
 
 //        stage.setScene(Client.scene);
         Client.setTitle("远程桌面监控客户端");

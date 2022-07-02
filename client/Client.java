@@ -46,7 +46,7 @@ public class Client {
 	/**
 	 * socket连接服务端
 	 * @param user
-	 * @return
+	 * @return 返回map存放socket dos dis
 	 */
 	public static HashMap connect(User user){
 		HashMap con = new HashMap();
@@ -155,30 +155,7 @@ public class Client {
 	 */
 	public static void sendUser(int type, User user, DataOutputStream dos) throws IOException{
 		byte[] data = SerializeData(user);
-		try {
-			switch (type){
-				case 1:
-					System.out.println("client register");
-					Protocol.send(Protocol.TYPE_REGISTER,dos, data);
-					break;
-				case 2:
-					System.out.println("client login");
-					Protocol.send(Protocol.TYPE_LOGIN, dos, data);
-					break;
-				case 3:
-					System.out.println("client logout");
-					Protocol.send(Protocol.TYPE_LOGOUT, dos, data);
-					break;
-				case 4:
-					System.out.println("client send image");
-					Protocol.send(Protocol.TYPE_IMAGE, dos, data);
-					break;
-				default:
-					break;
-			}
-		}catch (Exception e){
-			System.out.println("error in senduser");
-		}
+		Protocol.send(type, dos, data);
 	}
 
 	/**

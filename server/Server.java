@@ -1,8 +1,10 @@
 package server;
 
 
+import client.ClientShot;
 import dbcon.DataBase;
 import server.ServerView;
+import sun.awt.windows.ThemeReader;
 
 import javax.swing.text.View;
 import java.io.*;
@@ -24,6 +26,9 @@ public class Server {
 	public static String SelfAddress;
 	public static String HostName;
 
+
+
+
 	public static void main(String[] args) {
 		DataBase.DatabaseInit();
 		InetAddress ia = null;
@@ -43,7 +48,7 @@ public class Server {
 		}
 		try {
 			ServerSocket serverSocket = new ServerSocket(port);
-//			view.create();
+			new Thread(new ServerView()).start();
 			while(serverLive){
 				Socket socket = serverSocket.accept();
 				new Thread(new ServerShotHandler(socket)).start();

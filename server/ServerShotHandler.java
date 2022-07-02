@@ -61,7 +61,6 @@ public class ServerShotHandler implements Runnable{
                     System.out.println("yes");
                     System.out.println(user.getPassword());
                     System.out.println(user.getUsername());
-                    System.out.println("???:" + result.getType());
                 }
 
                 int res;
