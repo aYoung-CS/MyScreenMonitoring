@@ -20,30 +20,31 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import protocol.Protocol;
-import server.ServerView;
 
 import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
 import javax.imageio.ImageIO;
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 
+import client.Client;
+import server.ServerView;
+
+import static client.Client.*;
 
 //public String User;
-
 public class ClientView extends Application {
     public static void ClientView(String[] args){
         Application.launch(args);
     }
-//    相关变量
-
+    //    相关变量
     public String Username;
     public String Password;
     public String repwd;
@@ -51,16 +52,16 @@ public class ClientView extends Application {
     public String ClientMac;
     public String ServerIP;
     public String ServerPort;
-    public int ClientFluent;
     public int type;
     private TrayIcon trayIcon;
     private static Socket socket;
-    private static DataOutputStream dos = null;
-    private static DataInputStream dis = null;
+    public static DataOutputStream dos = null;
+    public static DataInputStream dis = null;
     private int signA=0;//用于
     private int signB=0;
     private int signC=0;
     public static User user;
+    public static Client client0 = new Client();
     public static void ClientView(String[] args, User user1){
         user = user1;
         Application.launch(args);
@@ -143,14 +144,6 @@ public class ClientView extends Application {
         label9.setLayoutX(250);
         label9.setLayoutY(350);
 
-//        Label label10 = new Label("ServerIP");
-//        label10.setLayoutX(250);
-//        label10.setLayoutY(400);
-//
-//        Label label11 = new Label("ServerPort");
-//        label11.setLayoutX(250);
-//        label11.setLayoutY(450);
-
 //客户端界面标签
         Label label12 = new Label("监控频率");
         label12.setLayoutX(250);
@@ -169,19 +162,6 @@ public class ClientView extends Application {
         TextField textField3 = new TextField ();
         textField3.setLayoutX(340);
         textField3.setLayoutY(350);
-
-//        textField1.setOnAction((ActionEvent e) -> {
-//            Username = textField1.getText();
-//            System.out.println(Username);
-//        });
-//        textField2.setOnAction((ActionEvent e) -> {
-//            ServerPort = textField2.getText();
-//            System.out.println(ServerIP);
-//        });
-//        textField3.setOnAction((ActionEvent e) -> {
-//            ServerPort = textField2.getText();
-//            System.out.println(ServerPort);
-//        });
 
 //注册文本框
         TextField textField4 = new TextField ();
@@ -202,8 +182,8 @@ public class ClientView extends Application {
         textField9.setLayoutY(300);
 
         textField9.setOnAction((ActionEvent e) -> {
-            ClientFluent = Integer.parseInt(textField9.getText());
-            System.out.println(ClientFluent);
+            user.Frequency = Integer.parseInt(textField9.getText());
+            System.out.println(user.Frequency);
         });
 
 
@@ -226,17 +206,6 @@ public class ClientView extends Application {
         PasswordField passwordField3 = new PasswordField();
         passwordField3.setLayoutX(340);
         passwordField3.setLayoutY(250);
-
-        passwordField2.setOnAction((ActionEvent e) -> {
-            Password = passwordField2.getText();
-            System.out.println(Password);
-
-        });
-
-        passwordField3.setOnAction((ActionEvent e) -> {
-            repwd = passwordField3.getText();
-            System.out.println(repwd);
-        });
 
 // CreateText
 // 登录Text
@@ -364,12 +333,18 @@ public class ClientView extends Application {
                 signA++;
             }
             if(textField2.getText().equals("")||textField2.getText()==null){
-                text10.setText("主机IP不能为空");
+                text10.setText("ServerIP不能为空");
+            }
+            else if(!isCorrectIp(textField2.getText())){
+                text10.setText("输入IP格式错误");
             }else{
                 signA++;
             }
             if(textField3.getText().equals("")||textField3.getText()==null){
-                text11.setText("主机Mac不能为空");
+                text11.setText("ServerPort不能为空");
+            }
+            else if(!isCorrectIp(textField3.getText())){
+                text11.setText("输入PORT超出范围");
             }else{
                 signA++;
             }
@@ -381,37 +356,41 @@ public class ClientView extends Application {
                 type = 1;
                 signA++;
             }
-            if(signA == 5){
+            if(signA == 5) {
 
                 user.setUsername(Username);
                 user.setPassword(Password);
                 user.setServerIP(ServerIP);
                 user.setServerPort(ServerPort);
-                if (socket == null) {
-                    HashMap con = client.Client.connect(user);
+                HashMap con = client.Client.connect(user);
+                if (con == null) {
+                    System.out.println("服务端连接异常，请检查IP和端口");
+                } else {
                     socket = (Socket) con.get("socket");
                     dos = (DataOutputStream) con.get("dos");
                     dis = (DataInputStream) con.get("dis");
-                }
 
-                try {
-                    client.Client.login(user, dos);
-                    String res = client.Client.getMsg(dis);
-                    System.out.println(res);
-                    if(res.equals("fail")){
-                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                        alert.setTitle(null);
-                        alert.setHeaderText(null);
-                        alert.setContentText("Login Fail");
-                        alert.showAndWait();
-                        Client.setScene(ClientHome);
-                    }else{
-                        Client.setScene(ClientMonitor);
+
+                    try {
+                        client.Client.login(user, dos);
+                        String res = client.Client.getMsg(dis);
+                        System.out.println(res);
+                        if (res.equals("fail")) {
+                            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                            alert.setTitle(null);
+                            alert.setHeaderText(null);
+                            alert.setContentText("Login Fail");
+                            alert.showAndWait();
+                            Client.setScene(ClientHome);
+                        } else {
+                            Client.setScene(ClientMonitor);
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
-                } catch (IOException e) {
-                    e.printStackTrace();
                 }
             }
+l:
             signA = 0;
 // 清空文本框内容
             textField1.clear();
@@ -461,15 +440,20 @@ public class ClientView extends Application {
             }
             if(textField5.getText().equals("")||textField5.getText()==null){
                 text4.setText("ServerIP不能为空");
+            }
+            else if(!isCorrectIp(textField5.getText())){
+                text4.setText("输入IP格式错误");
             }else{
                 signB++;
             }
             if(textField6.getText().equals("")||textField6.getText()==null){
                 text5.setText("ServerPort不能为空");
+            }
+            else if(!isCorrectIp(textField6.getText())){
+                text5.setText("输入PORT超出范围");
             }else{
                 signB++;
             }
-
             if(signB == 6){
                 Username = textField4.getText();
                 ServerIP = textField5.getText();
@@ -479,45 +463,47 @@ public class ClientView extends Application {
                 type = 0;
                 signB++;
             }
-            if(signB == 7){
+            if(signB == 7) {
                 user.setUsername(Username);
                 user.setPassword(Password);
-                user.setClientIP(user.getClientIP());
-                user.setClientMac(user.getClientMac());
                 user.setServerIP(ServerIP);
                 user.setServerPort(ServerPort);
-                System.out.println(user.getUsername());
                 HashMap con = client.Client.connect(user);
-                socket = (Socket) con.get("socket");
-                dos = (DataOutputStream) con.get("dos");
-                dis = (DataInputStream) con.get("dis");
-
-                try {
-                    client.Client.register(user, dos);
-                    String res = client.Client.getMsg(dis);
-                    System.out.println(res);
-                    if(res.equals("fail")){
-                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                        alert.setTitle(null);
-                        alert.setHeaderText(null);
-                        alert.setContentText("Register Fail");
-                        alert.showAndWait();
-                    }else if(res.equals("username repeat")){
-                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                        alert.setTitle(null);
-                        alert.setHeaderText(null);
-                        alert.setContentText("Username Repeat");
-                        alert.showAndWait();
-                    } else{
-                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                        alert.setTitle(null);
-                        alert.setHeaderText(null);
-                        alert.setContentText("Register Success");
-                        alert.showAndWait();
-                        Client.setScene(ClientHome);
+                if (con == null) {
+                    System.out.println("error");
+                }
+                else {
+                    socket = (Socket) con.get("socket");
+                    dos = (DataOutputStream) con.get("dos");
+                    dis = (DataInputStream) con.get("dis");
+                    System.out.println(user.getUsername());
+                    try {
+                        client.Client.register(user, dos);
+                        String res = client.Client.getMsg(dis);
+                        System.out.println(res);
+                        if (res.equals("fail")) {
+                            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                            alert.setTitle(null);
+                            alert.setHeaderText(null);
+                            alert.setContentText("Register Fail");
+                            alert.showAndWait();
+                        } else if (res.equals("username repeat")) {
+                            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                            alert.setTitle(null);
+                            alert.setHeaderText(null);
+                            alert.setContentText("Username Repeat");
+                            alert.showAndWait();
+                        } else {
+                            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                            alert.setTitle(null);
+                            alert.setHeaderText(null);
+                            alert.setContentText("Register Success");
+                            alert.showAndWait();
+                            Client.setScene(ClientHome);
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
-                } catch (IOException e) {
-                    e.printStackTrace();
                 }
             }
             signB = 0;
@@ -551,6 +537,7 @@ public class ClientView extends Application {
                 alert.setHeaderText(null);
                 alert.setContentText("Logout");
                 alert.showAndWait();
+                client0.islive=false;
                 Client.setScene(ClientMonitor);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -569,30 +556,31 @@ public class ClientView extends Application {
             }
             if(signC == 1){
 
-                ClientFluent = Integer.parseInt(textField9.getText());
+                user.Frequency = Integer.parseInt(textField9.getText());
                 type = 2;
                 signC++;
             }
             if(signC == 2){
+
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
                 alert.setTitle(null);
                 alert.setHeaderText(null);
                 alert.setContentText("开始监控");
                 alert.showAndWait();
-
+                client0.islive=true;
+                new Thread( new Client()).start();
 
                 type = 2;
-
             }
             signC=0;
             textField9.clear();
 //测试
-            System.out.println(ClientFluent);
+            System.out.println(user.Frequency);
         });
 
 //        stage.setScene(Client.scene);
         Client.setTitle("远程桌面监控客户端");
-        Client.getIcons().add(new Image("file:img/1.jpeg"));
+        Client.getIcons().add(new Image("img/1.jpeg"));
         Client.show();
 
     }
@@ -666,8 +654,6 @@ public class ClientView extends Application {
             }
         };
 
-
-
         openItem.addActionListener(acl);
         quitItem.addActionListener(acl);
         hideItem.addActionListener(acl);
@@ -678,16 +664,11 @@ public class ClientView extends Application {
 
         try {
             SystemTray tray = SystemTray.getSystemTray();
-            BufferedImage image = ImageIO.read(this.getClass().getResourceAsStream("1.gif"));
-//            System.out.println(image);
-//            Client.getIcons().add(new Image("file:img/1.jpeg"));
-//            ServletContext. getResourceAsStream(String path)
+            BufferedImage image = ImageIO.read(this.getClass().getResourceAsStream("/img/1.gif"));
             trayIcon = new TrayIcon(image, "远程桌面监控客户端", popupMenu);
             trayIcon.setToolTip("远程桌面监控客户端");
             tray.add(trayIcon);
             trayIcon.addMouseListener(sj);
-
-
 
         } catch (Exception e) {
             e.printStackTrace();

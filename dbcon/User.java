@@ -13,6 +13,7 @@ public class User implements Serializable {
     public String ClientMac;
     public String ServerIP;
     public String ServerPort;
+    public int Frequency;
     public byte[] imageData;
 
     public User(){

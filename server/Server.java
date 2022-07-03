@@ -1,10 +1,8 @@
 package server;
 
 
-import client.ClientShot;
 import dbcon.DataBase;
 import server.ServerView;
-import sun.awt.windows.ThemeReader;
 
 import javax.swing.text.View;
 import java.io.*;
@@ -19,15 +17,12 @@ import java.util.Map;
 public class Server {
 
 	public static Map<String,Socket> client=new HashMap<String,Socket>(); //已连接client集合
-//	public static View view= new View();
+	//	public static View view= new View();
 	public static String curKey=null;
 	public static boolean serverLive=true;
 	public static int port = 33000;
 	public static String SelfAddress;
 	public static String HostName;
-
-
-
 
 	public static void main(String[] args) {
 		DataBase.DatabaseInit();
@@ -48,7 +43,7 @@ public class Server {
 		}
 		try {
 			ServerSocket serverSocket = new ServerSocket(port);
-			new Thread(new ServerView()).start();
+			new Thread( new ServerView()).start();
 			while(serverLive){
 				Socket socket = serverSocket.accept();
 				new Thread(new ServerShotHandler(socket)).start();

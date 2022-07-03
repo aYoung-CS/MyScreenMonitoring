@@ -2,17 +2,23 @@ package server;
 
 import dbcon.DataBase;
 import dbcon.User;
+import javafx.embed.swing.SwingFXUtils;
+import javafx.scene.image.Image;
 import protocol.Protocol;
 import protocol.Result;
 import server.Server;
 import server.ServerView;
 import dbcon.DataBase;
 
+import javax.imageio.ImageIO;
 import javax.xml.crypto.Data;
 import java.awt.dnd.DropTarget;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+
+import static protocol.Protocol.DeserializeData;
 
 public class ServerShotHandler implements Runnable{
     private Socket socket;
@@ -33,14 +39,7 @@ public class ServerShotHandler implements Runnable{
             System.out.println("ServerShotHandler constructor is wrong");
         }
     }
-    public User DeserializeData(byte[] bytes) throws IOException, ClassNotFoundException {
-        ByteArrayInputStream bin = new ByteArrayInputStream(bytes);
-        ObjectInputStream oin = new ObjectInputStream(bin);
-        User user = (User)oin.readObject();
-        oin.close();
-        bin.close();
-        return user;
-    }
+
     @Override
     public void run() {
         System.out.println("ok");
@@ -61,6 +60,7 @@ public class ServerShotHandler implements Runnable{
                     System.out.println("yes");
                     System.out.println(user.getPassword());
                     System.out.println(user.getUsername());
+                    System.out.println("???:" + result.getType());
                 }
 
                 int res;
@@ -75,6 +75,8 @@ public class ServerShotHandler implements Runnable{
                             break;
                         case 1:
                             msg = "success".getBytes(StandardCharsets.UTF_8);
+//  修改状态，UI增加用户
+                            ServerView.ChangeStatus(result.getType(),user.getUsername());
                             break;
                         case 2:
                             msg = "username repeat".getBytes(StandardCharsets.UTF_8);
@@ -92,6 +94,8 @@ public class ServerShotHandler implements Runnable{
                             break;
                         case 1:
                             msg = "success".getBytes(StandardCharsets.UTF_8);
+//   修改状态，用户为“在线”状态
+                            ServerView.ChangeStatus(result.getType(),user.getUsername());
                             break;
                         default:
                             break;
@@ -103,8 +107,17 @@ public class ServerShotHandler implements Runnable{
                     socket.close();
                     dos.close();
                     dis.close();
+// 修改状态，用户为“离线”状态
+                    ServerView.ChangeStatus(result.getType(),user.getUsername());
                     break;
                 } else if (type == Protocol.TYPE_IMAGE) {
+
+                    System.out.println("images");
+                    ByteArrayInputStream bai=new ByteArrayInputStream(user.imageData);
+                    System.out.println("images1");
+                    BufferedImage buff= ImageIO.read(bai);
+                    Image image = SwingFXUtils.toFXImage(buff, null);
+                    ServerView.setImg(image,user.getUsername());
 
                 }
             } catch (Exception e) {
