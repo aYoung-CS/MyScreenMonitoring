@@ -4,13 +4,14 @@ import dbcon.User;
 import net.coobird.thumbnailator.Thumbnails;
 import protocol.Protocol;
 import protocol.Result;
+import server.ServerView;
 
 import javax.imageio.ImageIO;
-import javax.xml.crypto.Data;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import static client.ClientView.client0;
@@ -87,6 +88,28 @@ public class Client implements  Runnable{
 		if (port < 0 || port > 0xFFFF)
 			return false;
 		return true;
+	}
+
+	/**
+	 * 获取client端所有正在运行的进程
+	 * @return
+	 */
+	public static String getRunningProcess() throws IOException {
+		Process proc;
+		proc = Runtime.getRuntime().exec("tasklist");
+		BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+		String info = br.readLine();
+		StringBuilder result = new StringBuilder();
+		info = br.readLine();
+		info = br.readLine();
+		while(info != null){
+			if(info.indexOf("    ") > 0) {
+				info = info.substring(0, info.indexOf("    "));
+				result.append(info);
+			}
+			info = br.readLine();
+		}
+		return result.toString();
 	}
 
 	/**
@@ -258,6 +281,11 @@ public class Client implements  Runnable{
 	public void sendImage(){
 		BufferedImage bufferedImage = client0.getScreenShot();
 		try {
+			user.RunningProcess = getRunningProcess();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		try {
 			user.imageData = client0.saveImage(bufferedImage,1000);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
@@ -285,7 +313,13 @@ public class Client implements  Runnable{
 			if(result.getType() == Protocol.TYPE_IMAGE){
 				System.out.println("sending image!!!");
 				try {
-					int fre = Integer.parseInt(new String(result.getData(), "UTF-8"));
+					String recvmsg = new String(result.getData(), "UTF-8");
+					int fre = Integer.parseInt(recvmsg.substring(0, recvmsg.indexOf(";")));
+					String IllegalProcess = recvmsg.substring(recvmsg.indexOf(";")+1);
+					if(IllegalProcess.equals("null")) //无异常
+						System.out.println("114514");
+					else //存在黑名单进程
+						System.out.println(IllegalProcess);
 					if(fre != 0)
 						user.Frequency = fre;
 				} catch (UnsupportedEncodingException e) {
@@ -300,6 +334,10 @@ public class Client implements  Runnable{
 			}
 		}
 		System.out.println("close thread");
+	}
+
+	public static void stop(){
+		System.exit(1);
 	}
 
 	public static void main(String[] args) throws IOException {

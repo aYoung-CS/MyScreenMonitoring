@@ -1,6 +1,7 @@
 package server;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
@@ -9,6 +10,8 @@ import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -20,19 +23,26 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
+import java.awt.*;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseListener;
+import java.awt.image.BufferedImage;
 import java.util.*;
 
 import static dbcon.DataBase.DatabaseInit;
 
 import  dbcon.DataBase;
+import javafx.stage.WindowEvent;
 import protocol.Protocol;
+
+import javax.imageio.ImageIO;
 
 
 public  class ServerView extends Application implements Runnable{
 
     //    相关变量
     public static int ServerFluent;
-
+    private TrayIcon trayIcon;
     public static Image img;
     public static ImageView imageView=new ImageView();
     public static String Username=null;
@@ -40,6 +50,7 @@ public  class ServerView extends Application implements Runnable{
     public static int i=0;
     public static int Type=0;
     public static String username=null;
+    public static String Blacklist = "cccc.exe;dddd.exe";
     public static Vector<dbcon.User> v=new Vector<dbcon.User>();
 //    private DataBase db = new DataBase();
 //    public dbcon.User user0;
@@ -252,6 +263,17 @@ public  class ServerView extends Application implements Runnable{
             System.out.println(ServerFluent);
         });
 
+        // 托盘最小化
+//  点关闭不关闭窗口
+        enableTray(Server);
+        Platform.setImplicitExit(false);
+        Server.setOnCloseRequest(new EventHandler<WindowEvent>() {
+
+            @Override
+            public void handle(WindowEvent arg0) {
+                Server.hide();
+            }
+        });
 //服务端场景
         Scene ServerBoard = new Scene(grid,1600,800);
 
@@ -296,6 +318,99 @@ public  class ServerView extends Application implements Runnable{
 
 
     }
+    private void enableTray(final Stage stage) {
+        PopupMenu popupMenu = new PopupMenu();
+        java.awt.MenuItem openItem = new java.awt.MenuItem("显示");
+        java.awt.MenuItem hideItem = new java.awt.MenuItem("最小化");
+        java.awt.MenuItem quitItem = new java.awt.MenuItem("退出");
+
+        ActionListener acl = new ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+                java.awt.MenuItem item = (java.awt.MenuItem) e.getSource();
+                Platform.setImplicitExit(false); //多次使用显示和隐藏设置false
+
+                if (item.getLabel().equals("退出")) {
+                    SystemTray.getSystemTray().remove(trayIcon);
+                    Platform.exit();
+                    return;
+                }
+                if (item.getLabel().equals("显示")) {
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            stage.show();
+                        }
+                    });
+                }
+                if (item.getLabel().equals("最小化")) {
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            stage.hide();
+                        }
+                    });
+                }
+
+            }
+
+        };
+
+        //双击事件方法
+        MouseListener sj = new MouseListener() {
+            public void mouseReleased(java.awt.event.MouseEvent e) {
+            }
+            public void mousePressed(java.awt.event.MouseEvent e) {
+            }
+            public void mouseExited(java.awt.event.MouseEvent e) {
+            }
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+            }
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                Platform.setImplicitExit(false); //多次使用显示和隐藏设置false
+                if (e.getClickCount() == 2) {
+                    if (stage.isShowing()) {
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                stage.hide();
+                            }
+                        });
+                    }else{
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                stage.show();
+                            }
+                        });
+                    }
+                }
+            }
+        };
+
+
+
+        openItem.addActionListener(acl);
+        quitItem.addActionListener(acl);
+        hideItem.addActionListener(acl);
+
+        popupMenu.add(openItem);
+        popupMenu.add(hideItem);
+        popupMenu.add(quitItem);
+
+        try {
+            SystemTray tray = SystemTray.getSystemTray();
+            BufferedImage image = ImageIO.read(this.getClass().getResourceAsStream("/img/2.gif"));
+            trayIcon = new TrayIcon(image, "远程桌面监控服务端", popupMenu);
+            trayIcon.setToolTip("远程桌面监控服务端");
+            tray.add(trayIcon);
+            trayIcon.addMouseListener(sj);
+
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     @Override
     public void init() throws Exception {
@@ -307,7 +422,7 @@ public  class ServerView extends Application implements Runnable{
     @Override
     public void stop() throws Exception {
         super.stop();
-
+        Server.stop();
         System.out.println("stop...");
     }
 }

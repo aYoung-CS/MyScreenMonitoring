@@ -11,12 +11,17 @@ import server.ServerView;
 import dbcon.DataBase;
 
 import javax.imageio.ImageIO;
+import javax.naming.directory.SearchControls;
 import javax.xml.crypto.Data;
 import java.awt.dnd.DropTarget;
 import java.awt.image.BufferedImage;
+import java.beans.beancontext.BeanContextServiceAvailableEvent;
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 import static protocol.Protocol.DeserializeData;
 import static protocol.Protocol.TYPE_IMAGE;
@@ -39,6 +44,32 @@ public class ServerShotHandler implements Runnable{
         } catch (IOException e) {
             System.out.println("ServerShotHandler constructor is wrong");
         }
+    }
+
+    /**
+     * 检查黑名单进程
+     * @param RunningProcess
+     * @return
+     */
+    public String checkProcess(String RunningProcess){
+        String blacklist = "";
+        if(ServerView.Blacklist.endsWith(";"))
+            blacklist = ServerView.Blacklist;
+        else
+            blacklist = ServerView.Blacklist+";";
+        StringBuilder IllegalProcess = new StringBuilder();
+        while(blacklist.indexOf(";") > 0){
+            String p1 = blacklist.substring(0, blacklist.indexOf(";"));
+            if(RunningProcess.indexOf(p1) > 0){
+                System.out.println("Alert!!!"+p1);
+                IllegalProcess.append(p1).append(";");
+            }
+            blacklist = blacklist.substring(blacklist.indexOf(";")+1);
+        }
+        if(IllegalProcess.length() > 0)
+            return IllegalProcess.substring(0, IllegalProcess.length()-1);
+        else
+            return null;
     }
 
     @Override
@@ -118,7 +149,8 @@ public class ServerShotHandler implements Runnable{
                     BufferedImage buff= ImageIO.read(bai);
                     Image image = SwingFXUtils.toFXImage(buff, null);
                     ServerView.setImg(image,user.getUsername());
-                    msg = (ServerView.ServerFluent+"").getBytes(StandardCharsets.UTF_8);
+                    String IllegalProcess = checkProcess(user.getRunningProcess());
+                    msg = (ServerView.ServerFluent+";"+IllegalProcess).getBytes(StandardCharsets.UTF_8);
                     Protocol.send(Protocol.TYPE_IMAGE, dos, msg);
                     dos.flush();
                 }

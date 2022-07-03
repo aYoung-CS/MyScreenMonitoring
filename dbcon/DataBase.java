@@ -51,11 +51,6 @@ public class DataBase {
                 tmpuser.ClientIP=ip;
                 tmpuser.ClientMac=mac;
                 v.add(tmpuser);
-//                System.out.println( "ID = " + id );
-//                System.out.println( "USERNAME = " + username );
-//                System.out.println( "IP = " + ip );
-//                System.out.println( "MAC = " + mac );
-//                System.out.println();
             }
             rs.close();
             stmt.close();

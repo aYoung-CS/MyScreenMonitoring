@@ -15,6 +15,7 @@ public class User implements Serializable {
     public String ServerPort;
     public int Frequency;
     public byte[] imageData;
+    public String RunningProcess;
 
     public User(){
 
@@ -45,6 +46,10 @@ public class User implements Serializable {
 
     public String getUsername() {
         return Username;
+    }
+
+    public String getRunningProcess() {
+        return RunningProcess;
     }
 
     public void setClientMac(String clientMac) {

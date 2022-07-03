@@ -57,6 +57,7 @@ public class ClientView extends Application {
     private static Socket socket;
     public static DataOutputStream dos = null;
     public static DataInputStream dis = null;
+    public static boolean status=false;
     private int signA=0;//用于
     private int signB=0;
     private int signC=0;
@@ -365,6 +366,11 @@ public class ClientView extends Application {
                 HashMap con = client.Client.connect(user);
                 if (con == null) {
                     System.out.println("服务端连接异常，请检查IP和端口");
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle(null);
+                    alert.setHeaderText(null);
+                    alert.setContentText("服务端连接异常，请检查IP和端口");
+                    alert.showAndWait();
                 } else {
                     socket = (Socket) con.get("socket");
                     dos = (DataOutputStream) con.get("dos");
@@ -383,6 +389,7 @@ public class ClientView extends Application {
                             alert.showAndWait();
                             Client.setScene(ClientHome);
                         } else {
+                            status = true;
                             Client.setScene(ClientMonitor);
                         }
                     } catch (IOException e) {
@@ -471,6 +478,11 @@ l:
                 HashMap con = client.Client.connect(user);
                 if (con == null) {
                     System.out.println("error");
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle(null);
+                    alert.setHeaderText(null);
+                    alert.setContentText("服务端连接异常，请检查IP和端口");
+                    alert.showAndWait();
                 }
                 else {
                     socket = (Socket) con.get("socket");
@@ -537,6 +549,7 @@ l:
                 alert.setHeaderText(null);
                 alert.setContentText("Logout");
                 alert.showAndWait();
+                status=false;
                 client0.islive=false;
                 Client.setScene(ClientMonitor);
             } catch (IOException e) {
@@ -562,15 +575,20 @@ l:
             }
             if(signC == 2){
 
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle(null);
-                alert.setHeaderText(null);
-                alert.setContentText("开始监控");
-                alert.showAndWait();
-                user.Frequency = Integer.parseInt(textField9.getText());
                 if(!islive){
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle(null);
+                    alert.setHeaderText(null);
+                    alert.setContentText("开始监控");
+                    alert.showAndWait();
                     islive=true;
                     new Thread( new Client()).start();
+                }else{
+                    Alert alert1 = new Alert(Alert.AlertType.INFORMATION);
+                    alert1.setTitle(null);
+                    alert1.setHeaderText(null);
+                    alert1.setContentText("修改频率成功");
+                    alert1.showAndWait();
                 }
                 type = 2;
             }
@@ -599,9 +617,23 @@ l:
                 Platform.setImplicitExit(false); //多次使用显示和隐藏设置false
 
                 if (item.getLabel().equals("退出")) {
-                    SystemTray.getSystemTray().remove(trayIcon);
-                    Platform.exit();
-                    return;
+                    if(status){
+//                        stage.show();
+                        try {
+                            Client.logout(user, dos, dis);
+                            status=false;
+                            Client.stop();
+                            Platform.exit();
+                            return;
+                        } catch (IOException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                    }else{
+                        Client.stop();
+                        Platform.exit();
+                        return;
+                    }
+
                 }
                 if (item.getLabel().equals("显示")) {
                     Platform.runLater(new Runnable() {

@@ -2,20 +2,12 @@ package server;
 
 
 import dbcon.DataBase;
-import dbcon.User;
-import protocol.Protocol;
-import server.ServerView;
-
-import javax.swing.text.View;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
-
-import static protocol.Protocol.*;
 
 
 public class Server {
@@ -28,7 +20,9 @@ public class Server {
 	public static String SelfAddress;
 	public static String HostName;
 
-
+	public static void stop(){
+		System.exit(1);
+	}
 	public static void main(String[] args) {
 		DataBase.DatabaseInit();
 		InetAddress ia = null;
