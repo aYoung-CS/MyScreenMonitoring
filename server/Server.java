@@ -2,6 +2,8 @@ package server;
 
 
 import dbcon.DataBase;
+
+import javax.naming.directory.SearchControls;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -16,7 +18,7 @@ public class Server {
 	//	public static View view= new View();
 	public static String curKey=null;
 	public static boolean serverLive=true;
-	public static int port = 33000;
+	public static volatile int Port = 0;
 	public static String SelfAddress;
 	public static String HostName;
 
@@ -24,7 +26,7 @@ public class Server {
 		System.exit(1);
 	}
 	public static void main(String[] args) {
-		DataBase.DatabaseInit();
+//		DataBase.DatabaseInit();
 		InetAddress ia = null;
 		try {
 			ia = InetAddress.getLocalHost();
@@ -36,13 +38,17 @@ public class Server {
 		SelfAddress = ia.getHostAddress();
 
 		try {
-			System.out.println("[+]start listening on " + SelfAddress + ":" + port);
+
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
 		try {
-			ServerSocket serverSocket = new ServerSocket(port);
 			new Thread( new ServerView()).start();
+			while(Port == 0){
+				continue;
+			}
+			System.out.println("[+]start listening on " + SelfAddress + ":" + Port);
+			ServerSocket serverSocket = new ServerSocket(Port);
 			while(serverLive){
 				Socket socket = serverSocket.accept();
 				new Thread(new ServerShotHandler(socket)).start();

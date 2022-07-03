@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -27,6 +28,10 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.*;
 
 import static dbcon.DataBase.DatabaseInit;
@@ -42,15 +47,20 @@ public  class ServerView extends Application implements Runnable{
 
     //    相关变量
     public static int ServerFluent;
+    public static String Blacklist = "";
     private TrayIcon trayIcon;
     public static Image img;
     public static ImageView imageView=new ImageView();
     public static String Username=null;
     public static GridPane grid=new GridPane();
     public static int i=0;
-    public static int Type=0;
+    public static int page=0;
     public static String username=null;
-    public static String Blacklist = "cccc.exe;dddd.exe";
+    public static String path = "src/image/" + Username;
+    public static File f ;
+    public static File result[] ;
+    public static BufferedImage buff=null;
+
     public static Vector<dbcon.User> v=new Vector<dbcon.User>();
 //    private DataBase db = new DataBase();
 //    public dbcon.User user0;
@@ -93,6 +103,7 @@ public  class ServerView extends Application implements Runnable{
     //    修改状态
     public static void ChangeStatus(int Type,String user){
 //登陆成功
+
         root.getChildren().clear();
         if(Type== Protocol.TYPE_LOGIN){
             i=0;
@@ -109,7 +120,6 @@ public  class ServerView extends Application implements Runnable{
         }
 //注册成功
         if(Type== Protocol.TYPE_REGISTER){
-
             users.add(new User(user,"离线"));
             root.getChildren().clear();
             users.stream().forEach((user0) -> {
@@ -128,10 +138,13 @@ public  class ServerView extends Application implements Runnable{
                 i++;
             }
             setImg(null,user);
+
             users.stream().forEach((user0) -> {
                 root.getChildren().add(new TreeItem<>(user0));
             });
         }
+
+
     }
 
 
@@ -199,8 +212,6 @@ public  class ServerView extends Application implements Runnable{
             }
         });
 
-
-
         //Defining cell content
         ServerColumn.setCellValueFactory(
                 (TreeTableColumn.CellDataFeatures<User, String> users) ->
@@ -209,11 +220,6 @@ public  class ServerView extends Application implements Runnable{
                 (TreeTableColumn.CellDataFeatures<User, String> status) ->
                         new ReadOnlyStringWrapper(status.getValue().getValue().getStatus())
         );
-
-
-//        BufferedImage buff= new BufferedImage();
-//        File file =new File("E:\\Java\\demo3\\img\\1.png");
-//        ImageIO.write(buff,"png",file);
 
 
         treeTableView.getColumns().setAll(ServerColumn,StatusColumn);
@@ -228,21 +234,22 @@ public  class ServerView extends Application implements Runnable{
         grid.setVgap(10);
         grid.setPadding(new Insets(0, 10, 0, 5));
         grid.add(treeTableView, 0, 0);
-        grid.add(text1, 1, 1);
+//        grid.add(text1, 1, 1);
 
         HBox hbox=new HBox();
+        HBox hbox1=new HBox();
+        hbox.setPadding(new Insets(0, 12, 10, 12)); //节点到边缘的距离
+        hbox.setSpacing(20); //节点之间的间距
+        hbox1.setPadding(new Insets(5, 12, 5, 12)); //节点到边缘的距离
+        hbox1.setSpacing(20); //节点之间的间距
 
 
-//显示图片,暂无
-
-//        FileInputStream input = new FileInputStream("E:\\Java\\demo3\\img\\1.png");
-//        Image image = new Image(input);
-//        ImageView imageView=new ImageView();
+// 显示图片
         imageView.setPreserveRatio(true);
         imageView.setFitHeight(700);
         imageView.setFitWidth(1200);
         grid.add(imageView, 1, 0);
-//        grid.add(imageView1, 1, 0);
+
 
 //服务端修改监控频率
 // 频率文本框
@@ -258,11 +265,113 @@ public  class ServerView extends Application implements Runnable{
         grid.add(button1, 0, 2);
 //按钮点击事件
         button1.setOnAction(event -> {
-
             ServerFluent = Integer.parseInt(textField1.getText());
             System.out.println(ServerFluent);
         });
+//打开图片文件夹
+        Text text=new Text("");
+        Button button2 = new Button("  查看历史图像  ");
 
+        button2.setOnAction(event -> {
+            // 路径
+            path = "src/image/" + Username;
+            f = new File(path);
+// 路径不存在
+            if (!f.exists()) {
+                System.out.println(path + " not exists");
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle(null);
+                alert.setHeaderText(null);
+                alert.setContentText("没有该用户文件夹");
+                alert.showAndWait();
+                return;
+            }else{
+                result = f.listFiles();
+                if(result.length==0){
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle(null);
+                    alert.setHeaderText(null);
+                    alert.setContentText("尚未保存该用户图片");
+                    alert.showAndWait();
+                }else {
+                    page = 0;
+                    buff = null;
+                    try {
+                        buff = ImageIO.read(new FileInputStream(path + "/" + result[page].getName()));
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    Image image = SwingFXUtils.toFXImage(buff, null);
+                    text.setText(result[page].getName().replace(".png",""));
+                    setImg(image, Username);
+                }
+            }
+
+        });
+
+        Button button3 = new Button("  上一张  ");
+        button3.setOnAction(event -> {
+            if(page<result.length&&page>=1){
+                try {
+                    page=page-1;
+                    buff = ImageIO.read(new FileInputStream(path + "/" + result[page].getName()));
+
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                Image image = SwingFXUtils.toFXImage(buff, null);
+                text.setText(result[page].getName().replace(".png",""));
+                setImg(image, Username);
+            }
+        });
+        Button button4 = new Button("  下一张  ");
+        button4.setOnAction(event -> {
+            if(page<result.length-1&&page>=0){
+
+                try {
+                    buff = ImageIO.read(new FileInputStream(path + "/" + result[++page].getName()));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                Image image = SwingFXUtils.toFXImage(buff, null);
+                text.setText(result[page].getName().replace(".png",""));
+                setImg(image, Username);
+            }
+        });
+
+        Button button5 =new Button("关闭图片查看");
+        button5.setOnAction(event -> {
+            text.setText("");
+            setImg(null,Username);
+        });
+//Port设置
+        TextField textField3 = new TextField ();
+        textField3.setPrefWidth(300);
+        textField3.setPromptText("输入服务端端口号");
+        textField3.setOnAction(event -> {
+            server.Server.Port = Integer.parseInt(textField3.getText());
+        });
+        Button button7 =new Button("设置PORT");
+        button7.setOnAction(event -> {
+            server.Server.Port = Integer.parseInt(textField3.getText());
+        });
+        hbox1.getChildren().addAll(button7,textField3,text1);
+
+//黑名单输入
+        TextField textField2 = new TextField ();
+        textField2.setPrefWidth(600);
+        textField2.setPromptText("黑名单输入格式(用;隔开)：ccc;ddd");
+        textField2.setOnAction(event -> {
+            Blacklist = textField2.getText();
+        });
+        Button button6 =new Button("设置黑名单");
+        button6.setOnAction(event -> {
+            Blacklist = textField2.getText();
+        });
+
+        hbox.getChildren().addAll(button2, button3,button4,button5,text,button6,textField2);
+        grid.add(hbox, 1, 2);
+        grid.add(hbox1, 1, 1);
         // 托盘最小化
 //  点关闭不关闭窗口
         enableTray(Server);
@@ -274,8 +383,10 @@ public  class ServerView extends Application implements Runnable{
                 Server.hide();
             }
         });
+
+
 //服务端场景
-        Scene ServerBoard = new Scene(grid,1600,800);
+        Scene ServerBoard = new Scene(grid,1600,820);
 
         Server.setScene(ServerBoard);
         Server.setTitle("远程桌面监控服务端");
@@ -350,9 +461,7 @@ public  class ServerView extends Application implements Runnable{
                         }
                     });
                 }
-
             }
-
         };
 
         //双击事件方法
@@ -386,8 +495,6 @@ public  class ServerView extends Application implements Runnable{
                 }
             }
         };
-
-
 
         openItem.addActionListener(acl);
         quitItem.addActionListener(acl);

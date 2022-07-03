@@ -1,5 +1,6 @@
 package client;
 
+import com.sun.javafx.application.PlatformImpl;
 import dbcon.User;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -39,6 +40,7 @@ import server.ServerView;
 
 import static client.Client.*;
 
+
 //public String User;
 public class ClientView extends Application {
     public static void ClientView(String[] args){
@@ -63,15 +65,32 @@ public class ClientView extends Application {
     private int signC=0;
     public static User user;
     public static Client client0 = new Client();
+    public static String IllegalProcess = null;
+    public static Alert alert;
     public static void ClientView(String[] args, User user1){
         user = user1;
         Application.launch(args);
     }
+
+    public static void clientAlert() {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                alert.setTitle("异常报警");
+                alert.setHeaderText("发现下列黑名单程序，请立刻关闭");
+                alert.setContentText(IllegalProcess);
+                if(!alert.isShowing())
+                    alert.showAndWait();
+            }
+        });
+    }
+
     @Override
     public void start(Stage Client) throws Exception {
+
+
         System.out.println("start...");
-
-
+        alert = new Alert(Alert.AlertType.WARNING);
 
 //CreateButton
 //首页按钮
@@ -345,7 +364,7 @@ public class ClientView extends Application {
                 text11.setText("ServerPort不能为空");
             }
             else if(!isCorrectPort(textField3.getText())){
-                text11.setText("输入PORT超出范围");
+                text11.setText("输入PORT错误");
             }else{
                 signA++;
             }
@@ -375,7 +394,6 @@ public class ClientView extends Application {
                     socket = (Socket) con.get("socket");
                     dos = (DataOutputStream) con.get("dos");
                     dis = (DataInputStream) con.get("dis");
-
 
                     try {
                         client.Client.login(user, dos);
@@ -596,6 +614,7 @@ l:
             textField9.clear();
 //测试
             System.out.println(user.Frequency);
+
         });
 
 //        stage.setScene(Client.scene);

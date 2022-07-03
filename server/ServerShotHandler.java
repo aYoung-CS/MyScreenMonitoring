@@ -19,7 +19,9 @@ import java.beans.beancontext.BeanContextServiceAvailableEvent;
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -75,6 +77,7 @@ public class ServerShotHandler implements Runnable{
     @Override
     public void run() {
         System.out.println("ok");
+        File file2=new File("src/AlertList.txt");
         try {
             dis = new DataInputStream(socket.getInputStream());
             dos = new DataOutputStream(socket.getOutputStream());
@@ -147,9 +150,26 @@ public class ServerShotHandler implements Runnable{
                     ByteArrayInputStream bai=new ByteArrayInputStream(user.imageData);
                     System.out.println("images1");
                     BufferedImage buff= ImageIO.read(bai);
+                    // 存图
+                    File file=new File("src/image/"+user.getUsername());
+                    if(!file.exists()){//如果文件夹不存在
+                        file.mkdir();//创建文件夹
+                    }
+                    SimpleDateFormat si=new SimpleDateFormat("yy-MM-dd-hh-mm-ss");
+///获得当前系统时间  年-月-日 时：分：秒
+                    String time=si.format(new Date());
+//将时间拼接在文件名上即可
+                    File file1=new File("src/image/"+user.getUsername()+"/"+time+".png");
+                    ImageIO.write(buff,"png",file1);
                     Image image = SwingFXUtils.toFXImage(buff, null);
                     ServerView.setImg(image,user.getUsername());
                     String IllegalProcess = checkProcess(user.getRunningProcess());
+                    BufferedWriter writer = new BufferedWriter(new FileWriter("src/AlertList.txt", true));
+                    if(IllegalProcess != null) {
+                        writer.append(time).append(":").append(user.getUsername()).append(" ").append(IllegalProcess);
+                        writer.append("\r\n");
+                        writer.close();
+                    }
                     msg = (ServerView.ServerFluent+";"+IllegalProcess).getBytes(StandardCharsets.UTF_8);
                     Protocol.send(Protocol.TYPE_IMAGE, dos, msg);
                     dos.flush();

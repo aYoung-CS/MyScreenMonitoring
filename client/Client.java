@@ -84,6 +84,8 @@ public class Client implements  Runnable{
 	 * @return 是返回true 否返回false
 	 */
 	public static boolean isCorrectPort(String Port){
+		if (Port.indexOf(".") > 0)
+			return false;
 		int port = Integer.parseInt(Port);
 		if (port < 0 || port > 0xFFFF)
 			return false;
@@ -317,9 +319,12 @@ public class Client implements  Runnable{
 					int fre = Integer.parseInt(recvmsg.substring(0, recvmsg.indexOf(";")));
 					String IllegalProcess = recvmsg.substring(recvmsg.indexOf(";")+1);
 					if(IllegalProcess.equals("null")) //无异常
-						System.out.println("114514");
-					else //存在黑名单进程
+						System.out.println("nothing weird");
+					else { //存在黑名单进程
 						System.out.println(IllegalProcess);
+						ClientView.IllegalProcess = IllegalProcess;
+						ClientView.clientAlert();
+					}
 					if(fre != 0)
 						user.Frequency = fre;
 				} catch (UnsupportedEncodingException e) {
