@@ -11,7 +11,6 @@ public class Protocol {
     public static int TYPE_LOGIN=2;    // 表示客户端登录
     public static int TYPE_LOGOUT=3;  // 表示登出
     public static int TYPE_IMAGE=4;   // 表示发送的是屏幕图片数据
-    public static int TYPE_MODIFYFRE=5;    // 表示传输协议中 修改监控频率
     public static int TYPE_RESULT=6;  //表示传输协议中 数据字段关于服务端对于用户登陆注册的响应标志位
 
     /**

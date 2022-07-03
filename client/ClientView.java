@@ -343,7 +343,7 @@ public class ClientView extends Application {
             if(textField3.getText().equals("")||textField3.getText()==null){
                 text11.setText("ServerPort不能为空");
             }
-            else if(!isCorrectIp(textField3.getText())){
+            else if(!isCorrectPort(textField3.getText())){
                 text11.setText("输入PORT超出范围");
             }else{
                 signA++;
@@ -449,7 +449,7 @@ l:
             if(textField6.getText().equals("")||textField6.getText()==null){
                 text5.setText("ServerPort不能为空");
             }
-            else if(!isCorrectIp(textField6.getText())){
+            else if(!isCorrectPort(textField6.getText())){
                 text5.setText("输入PORT超出范围");
             }else{
                 signB++;
@@ -567,9 +567,11 @@ l:
                 alert.setHeaderText(null);
                 alert.setContentText("开始监控");
                 alert.showAndWait();
-                client0.islive=true;
-                new Thread( new Client()).start();
-
+                user.Frequency = Integer.parseInt(textField9.getText());
+                if(!islive){
+                    islive=true;
+                    new Thread( new Client()).start();
+                }
                 type = 2;
             }
             signC=0;

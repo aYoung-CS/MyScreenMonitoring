@@ -14,7 +14,7 @@ import java.net.*;
 import java.util.HashMap;
 
 import static client.ClientView.client0;
-import static protocol.Protocol.SerializeData;
+import static protocol.Protocol.*;
 
 /**
  * @Title Client
@@ -26,7 +26,7 @@ public class Client implements  Runnable{
 
 	public static Socket socket;
 	Robot robot;
-	static boolean islive = true;
+	static boolean islive = false;
 	public int loginType;
 	public String Password;
 	public String Username;
@@ -244,13 +244,6 @@ public class Client implements  Runnable{
 	}
 
 	/**
-	 * 系统托盘
-	 */
-	public void showSystemTray() {
-
-	}
-
-	/**
 	 * 获取服务端返回消息
 	 * @return msg
 	 */
@@ -259,62 +252,62 @@ public class Client implements  Runnable{
 		return new String(result.getData(), "UTF-8");
 	}
 
+	/**
+	 * 发送图片
+	 */
+	public void sendImage(){
+		BufferedImage bufferedImage = client0.getScreenShot();
+		try {
+			user.imageData = client0.saveImage(bufferedImage,1000);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+
+		try {
+			client0.sendUser(Protocol.TYPE_IMAGE,user,ClientView.dos);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+
+		try {
+			Thread.sleep(user.Frequency);
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	@Override
 	public void run() {
-
+		System.out.println("start run!!");
+		sendImage();
 		while(client0.islive){
-			try {
-				Result result = Protocol.getResult(ClientView.dis);
-				if(result.getType() == Protocol.TYPE_MODIFYFRE){
-					user = Protocol.DeserializeData(result.getData());
+			Result result = Protocol.getResult(ClientView.dis);
+			if(result.getType() == Protocol.TYPE_IMAGE){
+				System.out.println("sending image!!!");
+				try {
+					int fre = Integer.parseInt(new String(result.getData(), "UTF-8"));
+					if(fre != 0)
+						user.Frequency = fre;
+				} catch (UnsupportedEncodingException e) {
+					e.printStackTrace();
 				}
-			} catch (ClassNotFoundException | IOException e) {
-				e.printStackTrace();
+				System.out.println("Frequency: "+user.Frequency);
+				sendImage();
 			}
-			System.out.println("1");
-			BufferedImage bufferedImage = client0.getScreenShot();
-			try {
-				user.imageData = client0.saveImage(bufferedImage,1000);
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-
-			try {
-				client0.sendUser(Protocol.TYPE_IMAGE,user,ClientView.dos);
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-
-			try {
-				Thread.sleep(user.Frequency);
-			} catch (InterruptedException e) {
-				throw new RuntimeException(e);
+			else{
+				System.out.println("Wrong! stop the monitor");
+				client0.islive = false;
 			}
 		}
 		System.out.println("close thread");
 	}
 
-	public static void main(String[] args) throws IOException, InterruptedException {
-		System.out.println(isCorrectIp("1111"));
+	public static void main(String[] args) throws IOException {
 		user = new User();
 		user.ClientIP = InetAddress.getLocalHost().getHostAddress();
 		user.ClientMac = getLocalMac(InetAddress.getLocalHost());
 		System.out.println("IP:"+user.ClientIP);
 		System.out.println("mac:"+user.ClientMac);
 		ClientView.ClientView(args, user);
-
-		/*
-		client.load();// 登录
-
-		client.showSystemTray();// 显示托盘
-		*/
-//		while(client.islive){
-//			System.out.println("1");
-//			BufferedImage bufferedImage = client.getScreenShot();
-//			user.imageData = client.saveImage(bufferedImage);
-//			client.sendUser(Protocol.TYPE_IMAGE,user);
-//			Thread.sleep(50);
-//			System.exit(1);;
-//		}
 	}
 }

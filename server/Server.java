@@ -2,6 +2,8 @@ package server;
 
 
 import dbcon.DataBase;
+import dbcon.User;
+import protocol.Protocol;
 import server.ServerView;
 
 import javax.swing.text.View;
@@ -13,6 +15,8 @@ import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static protocol.Protocol.*;
+
 
 public class Server {
 
@@ -23,6 +27,7 @@ public class Server {
 	public static int port = 33000;
 	public static String SelfAddress;
 	public static String HostName;
+
 
 	public static void main(String[] args) {
 		DataBase.DatabaseInit();

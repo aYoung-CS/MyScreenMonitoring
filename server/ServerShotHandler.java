@@ -19,6 +19,7 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 
 import static protocol.Protocol.DeserializeData;
+import static protocol.Protocol.TYPE_IMAGE;
 
 public class ServerShotHandler implements Runnable{
     private Socket socket;
@@ -111,14 +112,15 @@ public class ServerShotHandler implements Runnable{
                     ServerView.ChangeStatus(result.getType(),user.getUsername());
                     break;
                 } else if (type == Protocol.TYPE_IMAGE) {
-
                     System.out.println("images");
                     ByteArrayInputStream bai=new ByteArrayInputStream(user.imageData);
                     System.out.println("images1");
                     BufferedImage buff= ImageIO.read(bai);
                     Image image = SwingFXUtils.toFXImage(buff, null);
                     ServerView.setImg(image,user.getUsername());
-
+                    msg = (ServerView.ServerFluent+"").getBytes(StandardCharsets.UTF_8);
+                    Protocol.send(Protocol.TYPE_IMAGE, dos, msg);
+                    dos.flush();
                 }
             } catch (Exception e) {
                 System.out.println(e);

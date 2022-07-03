@@ -31,7 +31,7 @@ import protocol.Protocol;
 public  class ServerView extends Application implements Runnable{
 
     //    相关变量
-    public int ServerFluent;
+    public static int ServerFluent;
 
     public static Image img;
     public static ImageView imageView=new ImageView();
@@ -67,6 +67,10 @@ public  class ServerView extends Application implements Runnable{
     //显示图像
     public static void setImg(Image image,String username){
         System.out.println(Username);
+        if(Username == null){
+            imageView.setImage(null);
+            return;
+        }
         if(Username.equals(username)){
             img=image;
             imageView.setImage(img);
