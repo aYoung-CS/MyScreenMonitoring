@@ -33,6 +33,7 @@ import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
 import client.Client;
@@ -379,6 +380,7 @@ public class ClientView extends Application {
             if(signA == 5) {
 
                 user.setUsername(Username);
+                Password = client.Client.getMD5(Password.getBytes(StandardCharsets.UTF_8));
                 user.setPassword(Password);
                 user.setServerIP(ServerIP);
                 user.setServerPort(ServerPort);
@@ -490,6 +492,7 @@ l:
             }
             if(signB == 7) {
                 user.setUsername(Username);
+                Password = client.Client.getMD5(Password.getBytes(StandardCharsets.UTF_8));
                 user.setPassword(Password);
                 user.setServerIP(ServerIP);
                 user.setServerPort(ServerPort);
