@@ -475,7 +475,7 @@ l:
                 text5.setText("ServerPort不能为空");
             }
             else if(!isCorrectPort(textField6.getText())){
-                text5.setText("输入PORT超出范围");
+                text5.setText("输入PORT错误");
             }else{
                 signB++;
             }

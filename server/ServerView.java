@@ -355,7 +355,7 @@ public  class ServerView extends Application implements Runnable{
         button7.setOnAction(event -> {
             server.Server.Port = Integer.parseInt(textField3.getText());
         });
-        hbox1.getChildren().addAll(button7,textField3,text1);
+        hbox1.getChildren().addAll(button7,textField3,text1,text);
 
 //黑名单输入
         TextField textField2 = new TextField ();
@@ -369,7 +369,7 @@ public  class ServerView extends Application implements Runnable{
             Blacklist = textField2.getText();
         });
 
-        hbox.getChildren().addAll(button2, button3,button4,button5,text,button6,textField2);
+        hbox.getChildren().addAll(button2, button3,button4,button5,button6,textField2);
         grid.add(hbox, 1, 2);
         grid.add(hbox1, 1, 1);
         // 托盘最小化
