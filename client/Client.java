@@ -5,16 +5,23 @@ import net.coobird.thumbnailator.Thumbnails;
 import protocol.Protocol;
 import protocol.Result;
 import server.ServerView;
-
+import dbcon.AesEnc;
 import javax.imageio.ImageIO;
+import javax.xml.crypto.Data;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.*;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.rmi.server.RMISocketFactory;
+import java.security.*;
+import java.security.cert.CertificateException;
 import java.util.HashMap;
-
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.TrustManagerFactory;
 import static client.ClientView.client0;
 import static protocol.Protocol.*;
 
@@ -26,28 +33,51 @@ import static protocol.Protocol.*;
 
 public class Client implements  Runnable{
 
-	public static Socket socket;
+	private static final String CLIENT_KEY_STORE_PASSWORD       = "client";
+	private static final String CLIENT_TRUST_KEY_STORE_PASSWORD = "serverc";
+
+	public static SSLSocket socket;
+	private static AesEnc aesEnc = new AesEnc();
 	Robot robot;
 	static boolean islive = false;
-	public int loginType;
-	public String Password;
-	public String Username;
-	public String repwd;
 	public Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 	public static User user;
-//	public static Result result;
-
+	public static SSLContext ctx1;
 
 	/**
 	 * init
 	 */
-	public Client(){
+	public Client() throws NoSuchAlgorithmException {
 		try{
+			ctx1 = SSLContext.getInstance("SSL");
+			KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+			TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
+
+			KeyStore ks = KeyStore.getInstance("JKS");
+			KeyStore tks = KeyStore.getInstance("JKS");
+
+			ks.load(new FileInputStream("key/client.keystore"), CLIENT_KEY_STORE_PASSWORD.toCharArray());
+			tks.load(new FileInputStream("key/tclient.keystore"), CLIENT_TRUST_KEY_STORE_PASSWORD.toCharArray());
+
+			kmf.init(ks, CLIENT_KEY_STORE_PASSWORD.toCharArray());
+			tmf.init(tks);
+			ctx1.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
 			robot = new Robot();
-		} catch (AWTException e) {
+		} catch (AWTException | NoSuchAlgorithmException | FileNotFoundException | KeyStoreException e) {
+			e.printStackTrace();
+		} catch (UnrecoverableKeyException e) {
+			e.printStackTrace();
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		} catch (CertificateException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (KeyManagementException e) {
 			e.printStackTrace();
 		}
 	}
+
 
 
 	/**
@@ -158,15 +188,16 @@ public class Client implements  Runnable{
 	public static HashMap connect(User user) {
 		HashMap con = new HashMap();
 		try{
-			socket = new Socket(user.ServerIP, Integer.parseInt(user.ServerPort));
+//			SSLsocket = new SSLSocket(user.ServerIP, Integer.parseInt(user.ServerPort));
+			socket = (SSLSocket) ctx1.getSocketFactory().createSocket(user.ServerIP, Integer.parseInt(user.ServerPort));
 			con.put("socket", socket);
 			con.put("dos", new DataOutputStream(socket.getOutputStream()));
 			con.put("dis", new DataInputStream(socket.getInputStream()));
-			System.out.println("connected");
+			System.out.println("[+]connected");
 			return con;
 		} catch (IOException e) {
 			e.printStackTrace();
-			System.out.println("Socket wrong");
+			System.out.println("[+]Socket wrong");
 			return null;
 		}
 	}
@@ -174,14 +205,14 @@ public class Client implements  Runnable{
 	/**
 	 * µÇÂ¼
 	 */
-	public static void login(User user, DataOutputStream dos) throws IOException {
+	public static void login(User user, DataOutputStream dos) throws Exception {
 		sendUser(Protocol.TYPE_LOGIN, user, dos);
 	}
 
 	/**
 	 * ×¢²á
 	 */
-	public static void register(User user, DataOutputStream dos) throws IOException {
+	public static void register(User user, DataOutputStream dos) throws Exception {
 		sendUser(Protocol.TYPE_REGISTER, user, dos);
 	}
 
@@ -189,7 +220,7 @@ public class Client implements  Runnable{
 	 * ÍË³ö
 	 * @throws IOException
 	 */
-	public static void logout(User user, DataOutputStream dos, DataInputStream dis) throws IOException {
+	public static void logout(User user, DataOutputStream dos, DataInputStream dis) throws Exception {
 		sendUser(Protocol.TYPE_LOGOUT, user, dos);
 		try {
 			if (dos != null)
@@ -259,9 +290,9 @@ public class Client implements  Runnable{
 	 * @param user
 	 * @throws IOException
 	 */
-	public static void sendUser(int type, User user, DataOutputStream dos) throws IOException{
+	public static void sendUser(int type, User user, DataOutputStream dos) throws Exception {
 		byte[] data = SerializeData(user);
-		Protocol.send(type, dos, data);
+		Protocol.send(type, dos, aesEnc.encrypt(data));
 	}
 
 
@@ -274,7 +305,6 @@ public class Client implements  Runnable{
 		byte[] bs = null;
 		if (buff == null){
 			islive = false;
-			System.out.println("²¶×½Í¼Æ¬Îª¿Õ");
 			return null;
 		}
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -297,9 +327,9 @@ public class Client implements  Runnable{
 				imageBytes = outputStream.toByteArray();
 			}
 
-			System.out.println("¡¾Í¼Æ¬Ñ¹Ëõ¡¿  Í¼Æ¬Ô­´óÐ¡=" + srcSize / 1024 + "+kb | Ñ¹Ëõºó´óÐ¡=" + imageBytes.length / 1024 + "kb");
+			System.out.println("[+]Í¼Æ¬Ñ¹Ëõ : Í¼Æ¬Ô­´óÐ¡=" + srcSize / 1024 + "+kb | Ñ¹Ëõºó´óÐ¡=" + imageBytes.length / 1024 + "kb");
 		} catch (Exception e) {
-			System.out.println("¡¾Í¼Æ¬Ñ¹Ëõ¡¿msg=Í¼Æ¬Ñ¹ËõÊ§°Ü!" + e);
+			System.out.println("[+]Í¼Æ¬Ñ¹ËõÊ§°Ü!" + e);
 		}
 		return imageBytes;
 	}
@@ -308,9 +338,9 @@ public class Client implements  Runnable{
 	 * »ñÈ¡·þÎñ¶Ë·µ»ØÏûÏ¢
 	 * @return msg
 	 */
-	public static String getMsg(DataInputStream dis) throws UnsupportedEncodingException {
+	public static String getMsg(DataInputStream dis) throws Exception {
 		Result result = Protocol.getResult(dis);
-		return new String(result.getData(), "UTF-8");
+		return new String(aesEnc.decrypt(result.getData()), "UTF-8");
 	}
 
 	/**
@@ -333,6 +363,8 @@ public class Client implements  Runnable{
 			client0.sendUser(Protocol.TYPE_IMAGE,user,ClientView.dos);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 
 		try {
@@ -344,18 +376,19 @@ public class Client implements  Runnable{
 
 	@Override
 	public void run() {
-		System.out.println("start run!!");
+		System.out.println("[+]start run!!");
 		sendImage();
 		while(client0.islive){
 			Result result = Protocol.getResult(ClientView.dis);
 			if(result.getType() == Protocol.TYPE_IMAGE){
-				System.out.println("sending image!!!");
+				System.out.println("[+]sending image!!!");
 				try {
-					String recvmsg = new String(result.getData(), "UTF-8");
+					String recvmsg = new String(aesEnc.decrypt(result.getData()), "UTF-8");
+					System.out.println("[+]recvmsg is " + recvmsg);
 					int fre = Integer.parseInt(recvmsg.substring(0, recvmsg.indexOf(";")));
 					String IllegalProcess = recvmsg.substring(recvmsg.indexOf(";")+1);
 					if(IllegalProcess.equals("null")) //ÎÞÒì³£
-						System.out.println("nothing weird");
+						System.out.println("[+]nothing weird");
 					else { //´æÔÚºÚÃûµ¥½ø³Ì
 						System.out.println(IllegalProcess);
 						ClientView.IllegalProcess = IllegalProcess;
@@ -365,12 +398,15 @@ public class Client implements  Runnable{
 						user.Frequency = fre;
 				} catch (UnsupportedEncodingException e) {
 					e.printStackTrace();
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
-				System.out.println("Frequency: "+user.Frequency);
+				System.out.println("[+]Frequency is : "+user.Frequency);
+
 				sendImage();
 			}
 			else{
-				System.out.println("Wrong! stop the monitor");
+				System.out.println("[+]Wrong! stop the monitor");
 				client0.islive = false;
 			}
 		}
@@ -385,8 +421,8 @@ public class Client implements  Runnable{
 		user = new User();
 		user.ClientIP = InetAddress.getLocalHost().getHostAddress();
 		user.ClientMac = getLocalMac(InetAddress.getLocalHost());
-		System.out.println("IP:"+user.ClientIP);
-		System.out.println("mac:"+user.ClientMac);
+		System.out.println("[+]client IP:"+user.ClientIP);
+		System.out.println("[+]client mac:"+user.ClientMac);
 		ClientView.ClientView(args, user);
 	}
 }

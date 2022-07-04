@@ -45,13 +45,12 @@ public class Protocol {
     }
 
     public static void send(int type, DataOutputStream dos, byte[] data) throws IOException {
-//        System.out.println(data.length);
         int TotalLen = 1+4+data.length;
-//        System.out.println(TotalLen);
         try {
             dos.writeByte(type);
             dos.writeInt(TotalLen);
             dos.write(data);
+//            System.out.println("[+]发送的加密数据为  " + new String(data));
             dos.flush();
         } catch (Exception e) {
             System.exit(0);
@@ -62,16 +61,13 @@ public class Protocol {
 
         try {
             byte type = dis.readByte();
-            System.out.println("type is " + type);
             int totalLen=dis.readInt();
-            System.out.println("totalLen is " + totalLen);
             byte[] bytes=new byte[totalLen-4-1];
-            System.out.println(bytes.length);
             dis.readFully(bytes);
             return new Result(type&0xFF,totalLen,bytes);
         } catch (IOException e) {
             // TODO Auto-generated catch block
-            System.out.println("getResult is wrong");
+            System.out.println("[+]getResult is wrong");
         }
         return null;
     }

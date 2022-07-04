@@ -46,8 +46,8 @@ import javax.imageio.ImageIO;
 public  class ServerView extends Application implements Runnable{
 
     //    相关变量
-    public static int ServerFluent;
     public static String Blacklist = "";
+    public static int ServerFluent;
     private TrayIcon trayIcon;
     public static Image img;
     public static ImageView imageView=new ImageView();
@@ -55,33 +55,16 @@ public  class ServerView extends Application implements Runnable{
     public static GridPane grid=new GridPane();
     public static int i=0;
     public static int page=0;
-    public static String username=null;
-    public static String path = "src/image/" + Username;
+    public static String path = "data/image/" + Username;
     public static File f ;
     public static File result[] ;
     public static BufferedImage buff=null;
-
     public static Vector<dbcon.User> v=new Vector<dbcon.User>();
-//    private DataBase db = new DataBase();
-//    public dbcon.User user0;
-//    public Result result0;
-//    public int type0;
-
-    //建立列表存放用户名
-//static ArrayList<User> users = new ArrayList<>();
     static Vector<User> users = new Vector<>();
-
     @Override
     public void run() {
         Application.launch();
     }
-
-
-    //    public static void ServerView(String[] args){
-//
-//        Application.launch(args);
-//
-//    }
     public static  TreeItem<User> root = new TreeItem<>(new User("   用户   ",""));
 
 
@@ -103,7 +86,6 @@ public  class ServerView extends Application implements Runnable{
     //    修改状态
     public static void ChangeStatus(int Type,String user){
 //登陆成功
-
         root.getChildren().clear();
         if(Type== Protocol.TYPE_LOGIN){
             i=0;
@@ -120,6 +102,7 @@ public  class ServerView extends Application implements Runnable{
         }
 //注册成功
         if(Type== Protocol.TYPE_REGISTER){
+
             users.add(new User(user,"离线"));
             root.getChildren().clear();
             users.stream().forEach((user0) -> {
@@ -138,30 +121,21 @@ public  class ServerView extends Application implements Runnable{
                 i++;
             }
             setImg(null,user);
-
             users.stream().forEach((user0) -> {
                 root.getChildren().add(new TreeItem<>(user0));
             });
         }
-
-
     }
-
-
 
     @Override
     public void start(Stage Server) throws Exception {
-        System.out.println("start...");
-
+        System.out.println("[+]ServerView start...");
 
         //Creating a tree table view
         TreeTableView<User> treeTableView = new TreeTableView<>(root);
         root.setExpanded(true);
 
-
         //初始化,显示用户和状态“离线”
-//        users.add(new User("a","离线"));
-//        Vector<dbcon.User> v = dbcon.DataBase.UserList(DatabaseInit());
         v= dbcon.DataBase.UserList(DatabaseInit());
         i=0;
         while(i<v.size()) {
@@ -173,8 +147,6 @@ public  class ServerView extends Application implements Runnable{
         });
 
         //Creating the root element
-
-
         //Creating a column
         TreeTableColumn<User,String> ServerColumn = new TreeTableColumn<>("服务端");
         TreeTableColumn<User,String> StatusColumn = new TreeTableColumn<>("状态");
@@ -206,12 +178,10 @@ public  class ServerView extends Application implements Runnable{
                         }
                         i++;
                     }
-//                    v.get(i).getUsername();
                     System.out.println(name);
                 }
             }
         });
-
         //Defining cell content
         ServerColumn.setCellValueFactory(
                 (TreeTableColumn.CellDataFeatures<User, String> users) ->
@@ -221,15 +191,11 @@ public  class ServerView extends Application implements Runnable{
                         new ReadOnlyStringWrapper(status.getValue().getValue().getStatus())
         );
 
-
         treeTableView.getColumns().setAll(ServerColumn,StatusColumn);
         treeTableView.setPrefWidth(302);
         treeTableView.setPrefHeight(700);
         treeTableView.setShowRoot(true);
-//        sceneRoot.getChildren().add(treeTableView);
-
 //布局
-//        GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
         grid.setPadding(new Insets(0, 10, 0, 5));
@@ -243,13 +209,11 @@ public  class ServerView extends Application implements Runnable{
         hbox1.setPadding(new Insets(5, 12, 5, 12)); //节点到边缘的距离
         hbox1.setSpacing(20); //节点之间的间距
 
-
-// 显示图片
         imageView.setPreserveRatio(true);
         imageView.setFitHeight(700);
         imageView.setFitWidth(1200);
         grid.add(imageView, 1, 0);
-
+//        grid.add(imageView1, 1, 0);
 
 //服务端修改监控频率
 // 频率文本框
@@ -265,6 +229,7 @@ public  class ServerView extends Application implements Runnable{
         grid.add(button1, 0, 2);
 //按钮点击事件
         button1.setOnAction(event -> {
+
             ServerFluent = Integer.parseInt(textField1.getText());
             System.out.println(ServerFluent);
         });
@@ -274,8 +239,9 @@ public  class ServerView extends Application implements Runnable{
 
         button2.setOnAction(event -> {
             // 路径
-            path = "src/image/" + Username;
+            path = "D://RDMS/data/image/" + Username;
             f = new File(path);
+// 路径不存在
 // 路径不存在
             if (!f.exists()) {
                 System.out.println(path + " not exists");
@@ -308,7 +274,6 @@ public  class ServerView extends Application implements Runnable{
             }
 
         });
-
         Button button3 = new Button("  上一张  ");
         button3.setOnAction(event -> {
             if(page<result.length&&page>=1){
@@ -356,7 +321,6 @@ public  class ServerView extends Application implements Runnable{
             server.Server.Port = Integer.parseInt(textField3.getText());
         });
         hbox1.getChildren().addAll(button7,textField3,text1,text);
-
 //黑名单输入
         TextField textField2 = new TextField ();
         textField2.setPrefWidth(600);
@@ -383,8 +347,6 @@ public  class ServerView extends Application implements Runnable{
                 Server.hide();
             }
         });
-
-
 //服务端场景
         Scene ServerBoard = new Scene(grid,1600,820);
 
@@ -461,7 +423,9 @@ public  class ServerView extends Application implements Runnable{
                         }
                     });
                 }
+
             }
+
         };
 
         //双击事件方法
@@ -522,7 +486,7 @@ public  class ServerView extends Application implements Runnable{
     @Override
     public void init() throws Exception {
         super.init();
-        System.out.println("init...");
+        System.out.println("[+]init...");
 
     }
 
@@ -530,6 +494,6 @@ public  class ServerView extends Application implements Runnable{
     public void stop() throws Exception {
         super.stop();
         Server.stop();
-        System.out.println("stop...");
+        System.out.println("[+]stop...");
     }
 }

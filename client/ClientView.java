@@ -1,6 +1,5 @@
 package client;
 
-import com.sun.javafx.application.PlatformImpl;
 import dbcon.User;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -20,10 +19,8 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import protocol.Protocol;
 
 import java.io.*;
-import java.net.InetAddress;
 import java.net.Socket;
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -31,14 +28,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
-import java.net.URL;
-import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
-
-import client.Client;
-import server.ServerView;
-
 import static client.Client.*;
 
 
@@ -51,8 +43,6 @@ public class ClientView extends Application {
     public String Username;
     public String Password;
     public String repwd;
-    public String ClientIP;
-    public String ClientMac;
     public String ServerIP;
     public String ServerPort;
     public int type;
@@ -65,7 +55,16 @@ public class ClientView extends Application {
     private int signB=0;
     private int signC=0;
     public static User user;
-    public static Client client0 = new Client();
+    public static Client client0;
+
+    static {
+        try {
+            client0 = new Client();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static String IllegalProcess = null;
     public static Alert alert;
     public static void ClientView(String[] args, User user1){
@@ -123,7 +122,7 @@ public class ClientView extends Application {
         button7.setLayoutX(300);
         button7.setLayoutY(400);
 
-        Button button8 = new Button("    开始监控    ");
+        Button button8 = new Button("    开始监控/修改频率    ");
         button8.setLayoutX(400);
         button8.setLayoutY(400);
 
@@ -414,10 +413,12 @@ public class ClientView extends Application {
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                 }
             }
-l:
+            l:
             signA = 0;
 // 清空文本框内容
             textField1.clear();
@@ -536,6 +537,8 @@ l:
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                 }
             }
@@ -564,7 +567,6 @@ l:
 
             try {
                 client.Client.logout(user, dos, dis);
-                System.out.println("logout");
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
                 alert.setTitle(null);
                 alert.setHeaderText(null);
@@ -574,6 +576,8 @@ l:
                 client0.islive=false;
                 Client.setScene(ClientMonitor);
             } catch (IOException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 
@@ -603,7 +607,11 @@ l:
                     alert.setContentText("开始监控");
                     alert.showAndWait();
                     islive=true;
-                    new Thread( new Client()).start();
+                    try {
+                        new Thread( new Client()).start();
+                    } catch (NoSuchAlgorithmException e) {
+                        e.printStackTrace();
+                    }
                 }else{
                     Alert alert1 = new Alert(Alert.AlertType.INFORMATION);
                     alert1.setTitle(null);
@@ -649,6 +657,8 @@ l:
                             return;
                         } catch (IOException ex) {
                             throw new RuntimeException(ex);
+                        } catch (Exception exception) {
+                            exception.printStackTrace();
                         }
                     }else{
                         Client.stop();
@@ -736,12 +746,12 @@ l:
     @Override
     public void init() throws Exception {
         super.init();
-        System.out.println("init...");
+        System.out.println("[+]ServerView init...");
     }
 
     @Override
     public void stop() throws Exception {
         super.stop();
-        System.out.println("stop...");
+        System.out.println("[+]ServerView stop...");
     }
 }

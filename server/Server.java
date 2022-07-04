@@ -1,32 +1,56 @@
 package server;
 
-
 import dbcon.DataBase;
-
-import javax.naming.directory.SearchControls;
+import javax.net.ssl.*;
 import java.io.*;
 import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.security.*;
+import java.security.cert.CertificateException;
 import java.util.HashMap;
-import java.util.Map;
-
+import java.util.Map;;
 
 public class Server {
 
-	public static Map<String,Socket> client=new HashMap<String,Socket>(); //已连接client集合
-	//	public static View view= new View();
-	public static String curKey=null;
+	public static Map<String, SSLSocket> client=new HashMap<String,SSLSocket>();
 	public static boolean serverLive=true;
 	public static volatile int Port = 0;
 	public static String SelfAddress;
 	public static String HostName;
-
+	private static final String SERVER_KEY_STORE_PASSWORD       = "server";
+	private static final String SERVER_TRUST_KEY_STORE_PASSWORD = "clients";
+	public static SSLServerSocket  ServerSocket;
 	public static void stop(){
 		System.exit(1);
 	}
+	public static void init() throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException, UnrecoverableKeyException, KeyManagementException {
+		try {
+			SSLContext ctx = SSLContext.getInstance("SSL");
+
+			KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+			TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
+
+			KeyStore ks = KeyStore.getInstance("JKS");
+			KeyStore tks = KeyStore.getInstance("JKS");
+
+			ks.load(new FileInputStream("key/server.keystore"), SERVER_KEY_STORE_PASSWORD.toCharArray());
+			tks.load(new FileInputStream("key/tserver.keystore"), SERVER_TRUST_KEY_STORE_PASSWORD.toCharArray());
+
+			kmf.init(ks, SERVER_KEY_STORE_PASSWORD.toCharArray());
+			tmf.init(tks);
+
+			ctx.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
+
+			ServerSocket = (SSLServerSocket) ctx.getServerSocketFactory().createServerSocket(Port);
+			ServerSocket.setNeedClientAuth(true);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 	public static void main(String[] args) {
-//		DataBase.DatabaseInit();
+		DataBase.DatabaseInit();
+		if(!DataBase.IsTableExist()){
+			DataBase.CreateTable();
+		};
 		InetAddress ia = null;
 		try {
 			ia = InetAddress.getLocalHost();
@@ -38,7 +62,7 @@ public class Server {
 		SelfAddress = ia.getHostAddress();
 
 		try {
-
+			System.out.println("[+]start listening on " + SelfAddress + ":" + Port);
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
@@ -47,13 +71,13 @@ public class Server {
 			while(Port == 0){
 				continue;
 			}
+			init();
 			System.out.println("[+]start listening on " + SelfAddress + ":" + Port);
-			ServerSocket serverSocket = new ServerSocket(Port);
 			while(serverLive){
-				Socket socket = serverSocket.accept();
+				SSLSocket socket = (SSLSocket) ServerSocket.accept();
 				new Thread(new ServerShotHandler(socket)).start();
 			}
-		} catch (IOException e) {
+		} catch (IOException | UnrecoverableKeyException | CertificateException | KeyStoreException | NoSuchAlgorithmException | KeyManagementException e) {
 			e.printStackTrace();
 		}
 	}

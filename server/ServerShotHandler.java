@@ -1,5 +1,6 @@
 package server;
 
+import dbcon.AesEnc;
 import dbcon.DataBase;
 import dbcon.User;
 import javafx.embed.swing.SwingFXUtils;
@@ -11,19 +12,14 @@ import server.ServerView;
 import dbcon.DataBase;
 
 import javax.imageio.ImageIO;
-import javax.naming.directory.SearchControls;
 import javax.xml.crypto.Data;
 import java.awt.dnd.DropTarget;
 import java.awt.image.BufferedImage;
-import java.beans.beancontext.BeanContextServiceAvailableEvent;
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-import java.util.Set;
 
 import static protocol.Protocol.DeserializeData;
 import static protocol.Protocol.TYPE_IMAGE;
@@ -32,12 +28,7 @@ public class ServerShotHandler implements Runnable{
     private Socket socket;
     private DataInputStream dis=null;
     private DataOutputStream dos=null;
-    private String key=null;
-    private boolean isLive=true;
-
-    public ServerShotHandler(){
-
-    }
+    private AesEnc aesEnc = new AesEnc();
 
     public ServerShotHandler(Socket socket){
         this.socket=socket;
@@ -47,7 +38,6 @@ public class ServerShotHandler implements Runnable{
             System.out.println("ServerShotHandler constructor is wrong");
         }
     }
-
     /**
      * 检查黑名单进程
      * @param RunningProcess
@@ -76,31 +66,22 @@ public class ServerShotHandler implements Runnable{
 
     @Override
     public void run() {
-        System.out.println("ok");
-        File file2=new File("src/AlertList.txt");
         try {
             dis = new DataInputStream(socket.getInputStream());
             dos = new DataOutputStream(socket.getOutputStream());
         } catch (IOException e) {
             e.printStackTrace();
-            System.out.println("dos/dis wrong");
+            System.out.println("[+]dos/dis wrong");
         }
         while (true) {
             try {
                 Result result = Protocol.getResult(dis);
-                System.out.println(result + "-----");
+//                System.out.println(result + "-----");
                 int type = result.getType();
-                User user = DeserializeData(result.getData());
-                if (type <= 2) {
-                    System.out.println("yes");
-                    System.out.println(user.getPassword());
-                    System.out.println(user.getUsername());
-                    System.out.println("???:" + result.getType());
-                }
-
+                User user = DeserializeData(aesEnc.decrypt(result.getData()));
                 int res;
                 byte[] msg = null;
-                System.out.println("type: " + type);
+                System.out.println("[+]·服务端解密数据后的type为: " + type);
 
                 if (type == Protocol.TYPE_REGISTER) {
                     res = DataBase.Register(user.getUsername(), user.getPassword(), user.getClientIP(), user.getClientMac());
@@ -110,7 +91,7 @@ public class ServerShotHandler implements Runnable{
                             break;
                         case 1:
                             msg = "success".getBytes(StandardCharsets.UTF_8);
-//  修改状态，UI增加用户
+
                             ServerView.ChangeStatus(result.getType(),user.getUsername());
                             break;
                         case 2:
@@ -119,7 +100,7 @@ public class ServerShotHandler implements Runnable{
                         default:
                             break;
                     }
-                    Protocol.send(Protocol.TYPE_LOGIN, dos, msg);
+                    Protocol.send(Protocol.TYPE_LOGIN, dos, aesEnc.encrypt(msg));
                     dos.flush();
                 } else if (type == Protocol.TYPE_LOGIN) {
                     res = DataBase.Login(user.getUsername(), user.getPassword());
@@ -129,29 +110,28 @@ public class ServerShotHandler implements Runnable{
                             break;
                         case 1:
                             msg = "success".getBytes(StandardCharsets.UTF_8);
-//   修改状态，用户为“在线”状态
+
                             ServerView.ChangeStatus(result.getType(),user.getUsername());
                             break;
                         default:
                             break;
                     }
-                    Protocol.send(Protocol.TYPE_LOGIN, dos, msg);
+                    Protocol.send(Protocol.TYPE_LOGIN, dos, aesEnc.encrypt(msg));
                     dos.flush();
                 } else if (type == Protocol.TYPE_LOGOUT) {
-                    System.out.println("User " + user.getUsername() + " logout");
+                    System.out.println("[+]用户名为" + user.getUsername() + "登出");
                     socket.close();
                     dos.close();
                     dis.close();
-// 修改状态，用户为“离线”状态
+
                     ServerView.ChangeStatus(result.getType(),user.getUsername());
                     break;
                 } else if (type == Protocol.TYPE_IMAGE) {
-                    System.out.println("images");
+                    System.out.println("[+]user.imageData length is " + user.imageData.length);
                     ByteArrayInputStream bai=new ByteArrayInputStream(user.imageData);
-                    System.out.println("images1");
                     BufferedImage buff= ImageIO.read(bai);
                     // 存图
-                    File file=new File("src/image/"+user.getUsername());
+                    File file=new File("D://RDMS/data/image/"+user.getUsername());
                     if(!file.exists()){//如果文件夹不存在
                         file.mkdir();//创建文件夹
                     }
@@ -159,24 +139,25 @@ public class ServerShotHandler implements Runnable{
 ///获得当前系统时间  年-月-日 时：分：秒
                     String time=si.format(new Date());
 //将时间拼接在文件名上即可
-                    File file1=new File("src/image/"+user.getUsername()+"/"+time+".png");
+                    File file1=new File("D://RDMS/data/image/"+user.getUsername()+"/"+time+".png");
                     ImageIO.write(buff,"png",file1);
                     Image image = SwingFXUtils.toFXImage(buff, null);
                     ServerView.setImg(image,user.getUsername());
                     String IllegalProcess = checkProcess(user.getRunningProcess());
-                    BufferedWriter writer = new BufferedWriter(new FileWriter("src/AlertList.txt", true));
+                    BufferedWriter writer = new BufferedWriter(new FileWriter("D://RDMS/data/AlertList.txt", true));
                     if(IllegalProcess != null) {
                         writer.append(time).append(":").append(user.getUsername()).append(" ").append(IllegalProcess);
                         writer.append("\r\n");
                         writer.close();
                     }
                     msg = (ServerView.ServerFluent+";"+IllegalProcess).getBytes(StandardCharsets.UTF_8);
-                    Protocol.send(Protocol.TYPE_IMAGE, dos, msg);
+                    System.out.println("[+]msg is " + new String(aesEnc.encrypt(msg)));
+                    Protocol.send(Protocol.TYPE_IMAGE, dos, aesEnc.encrypt(msg));
                     dos.flush();
                 }
             } catch (Exception e) {
                 System.out.println(e);
-                System.out.println("ServerShotHandler run is wrong");
+                System.out.println("[+]ServerShotHandler run is wrong");
             }
         }
     }

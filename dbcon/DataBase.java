@@ -11,16 +11,15 @@ public class DataBase {
     {
         try {
             Class.forName("org.sqlite.JDBC");
-            c = DriverManager.getConnection("jdbc:sqlite:D:/t/identifier.sqlite");
+            c = DriverManager.getConnection("jdbc:sqlite:userdata.db");
         } catch ( Exception e ) {
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
             System.out.println("数据库初始化失败");
         }
-        System.out.println("Opened database successfully");
         return c;
     }
 
-    public static boolean IsTableExist(Connection c)
+    public static boolean IsTableExist()
     {
         Statement stmt = null;
         try{
@@ -28,7 +27,7 @@ public class DataBase {
             ResultSet rs = stmt.executeQuery( "SELECT 1 FROM USER;" );
             return true;
         }catch (Exception e) {
-            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+//            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
             return false;
         }
     }
@@ -51,6 +50,11 @@ public class DataBase {
                 tmpuser.ClientIP=ip;
                 tmpuser.ClientMac=mac;
                 v.add(tmpuser);
+//                System.out.println( "ID = " + id );
+//                System.out.println( "USERNAME = " + username );
+//                System.out.println( "IP = " + ip );
+//                System.out.println( "MAC = " + mac );
+//                System.out.println();
             }
             rs.close();
             stmt.close();
@@ -78,7 +82,7 @@ public class DataBase {
             stmt.executeUpdate(sql);
             stmt.close();
         }catch (Exception e){
-            System.out.println("Create Table Wrong");
+            System.out.println("[+]Create Table Wrong");
             System.err.println(e);
         }
     }
@@ -108,7 +112,7 @@ public class DataBase {
         /*传参*/
         try {
             c.setAutoCommit(false);
-            System.out.println("Opened database successfully");
+            System.out.println("[+]Opened database successfully");
 
             stmt = c.createStatement();
             String sql = "INSERT INTO USER (USERNAME,PASSWORD,IP,MAC) " +
@@ -133,7 +137,6 @@ public class DataBase {
         Statement stmt=null;
         try {
             c.setAutoCommit(false);
-            System.out.println("Opened database successfully");
 
             stmt = c.createStatement();
             ResultSet rs = stmt.executeQuery( "SELECT * FROM USER WHERE USERNAME=\""+Username+"\" AND PASSWORD=\""+Password+"\";" );
